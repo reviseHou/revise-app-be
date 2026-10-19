@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{{block "title"}}} · ReviseHOU CMS</title>
+    <link rel="stylesheet" href="/cms/resources/adminlte/css/adminlte.min.css">
+    <link rel="stylesheet" href="/cms/resources/plugin/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="/cms/resources/data-tables/datatables.min.css">
+    <link rel="stylesheet" href="/cms/resources/css/cms.css">
+</head>
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+    {{> header}}
+    {{> sidebar}}
+    <div class="content-wrapper">
+        {{> content_header}}
+        <section class="content">
+            <div class="container-fluid">
+                {{> alert}}
+                {{{body}}}
+            </div>
+        </section>
+    </div>
+    {{> footer}}
+</div>
+<script src="/cms/resources/plugin/jquery/jquery.min.js"></script>
+<script src="/cms/resources/plugin/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/cms/resources/plugin/sortablejs/Sortable.min.js"></script>
+<script src="/cms/resources/adminlte/js/adminlte.min.js"></script>
+<script src="/cms/resources/data-tables/jquery.dataTables.min.js"></script>
+<script src="/cms/resources/js/cms.js"></script>
+</body>
+</html>

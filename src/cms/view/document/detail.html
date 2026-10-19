@@ -1,0 +1,80 @@
+{{#extend "title"}}{{document.title}}{{/extend}}
+{{#extend "breadcrumb"}}<li class="breadcrumb-item"><a href="/cms/documents">Duyệt tài liệu</a></li>{{/extend}}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card card-outline card-primary">
+            <div class="card-header">
+                <h3 class="card-title">{{document.title}}</h3>
+                <div class="card-tools">{{> status_badge status=document.status}}</div>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Môn học</dt>
+                    <dd class="col-sm-9">{{#if document.subject.major}}{{document.subject.major.faculty.code}} › {{document.subject.major.code}} › {{/if}}{{document.subject.title}}{{#unless document.subject.major}} <span class="text-muted">(môn chưa thuộc ngành)</span>{{/unless}}</dd>
+                    <dt class="col-sm-3">Người đăng</dt>
+                    <dd class="col-sm-9">{{document.author.username}} <span class="text-muted">({{document.author.email}})</span></dd>
+                    <dt class="col-sm-3">Ngày đăng</dt>
+                    <dd class="col-sm-9">{{moment document.createdAt "DD/MM/YYYY HH:mm:ss"}}</dd>
+                    <dt class="col-sm-3">Mô tả</dt>
+                    <dd class="col-sm-9">{{#if document.description}}{{document.description}}{{else}}<span class="text-muted">(trống)</span>{{/if}}</dd>
+                    {{#if document.rejectReason}}
+                    <dt class="col-sm-3">Lý do từ chối</dt>
+                    <dd class="col-sm-9 text-danger">{{document.rejectReason}}</dd>
+                    {{/if}}
+                    {{#if document.reviewedBy}}
+                    <dt class="col-sm-3">Xử lý gần nhất</dt>
+                    <dd class="col-sm-9">{{document.reviewedBy.username}} lúc {{moment document.dateReviewed "DD/MM/YYYY HH:mm:ss"}}</dd>
+                    {{/if}}
+                    <dt class="col-sm-3">Tệp</dt>
+                    <dd class="col-sm-9">{{#if document.fileUrl}}<a href="{{document.fileUrl}}" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt"></i> Mở tệp đính kèm</a>{{else}}<span class="text-muted">Không có tệp đính kèm</span>{{/if}}</dd>
+                </dl>
+                <h6>Nội dung</h6>
+                <pre class="document-content">{{document.content}}</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        {{#if (eq document.author.id user.id)}}
+        <div class="callout callout-warning">Đây là tài liệu do chính bạn đăng nên bạn không thể duyệt.</div>
+        {{else}}
+            {{#if (eq document.status 'PENDING')}}
+            <div class="card card-success card-outline">
+                <div class="card-header"><h3 class="card-title">Duyệt</h3></div>
+                <div class="card-body">
+                    <form method="post" action="/cms/documents/{{document.id}}/approve"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}"><button type="submit" class="btn btn-success btn-block"><i class="fas fa-check"></i> Duyệt tài liệu</button></form>
+                </div>
+            </div>
+            <div class="card card-danger card-outline">
+                <div class="card-header"><h3 class="card-title">Từ chối</h3></div>
+                <form method="post" action="/cms/documents/{{document.id}}/reject"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}">
+                    <div class="card-body">
+                        <p class="text-muted mb-2">Chọn tiêu chí vi phạm và ghi chú (bắt buộc).</p>
+                        {{#each criteria}}
+                        <div class="custom-control custom-checkbox">
+                            <input class="custom-control-input" type="checkbox" id="criteria{{code}}" name="criteria[]" value="{{code}}">
+                            <label for="criteria{{code}}" class="custom-control-label"><b>{{code}}</b> {{name}}</label>
+                        </div>
+                        {{/each}}
+                        <div class="form-group mt-3">
+                            <label for="note">Ghi chú</label>
+                            <textarea class="form-control" id="note" name="note" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="card-footer"><button type="submit" class="btn btn-danger btn-block"><i class="fas fa-times"></i> Từ chối</button></div>
+                </form>
+            </div>
+            {{/if}}
+            {{#if (eq document.status 'ACTIVE')}}
+            <div class="card"><div class="card-body">
+                <form method="post" action="/cms/documents/{{document.id}}/hide"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}"><button type="submit" class="btn btn-default btn-block" data-confirm="Ẩn tài liệu này?"><i class="fas fa-eye-slash"></i> Ẩn tài liệu</button></form>
+            </div></div>
+            {{/if}}
+            {{#if (eq document.status 'INACTIVE')}}
+            <div class="card"><div class="card-body">
+                <form method="post" action="/cms/documents/{{document.id}}/show"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}"><button type="submit" class="btn btn-primary btn-block"><i class="fas fa-eye"></i> Hiện lại tài liệu</button></form>
+            </div></div>
+            {{/if}}
+        {{/if}}
+    </div>
+</div>

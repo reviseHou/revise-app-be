@@ -1,0 +1,7 @@
+{{#extend "title"}}{{#if (eq status 403)}}Không có quyền{{else}}Lỗi {{status}}{{/if}}{{/extend}}
+<div class="card card-outline card-danger">
+    <div class="card-body">
+        <h5><i class="fas fa-ban text-danger"></i> {{#if (eq status 403)}}Không có quyền{{else}}Lỗi {{status}}{{/if}}</h5>
+        <p class="mb-0">{{#if (eq status 403)}}Bạn không có quyền sử dụng chức năng này.{{else}}{{message}}{{/if}}</p>
+    </div>
+</div>

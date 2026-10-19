@@ -1,0 +1,29 @@
+{{#extend "title"}}Duyệt tài liệu{{/extend}}
+<div class="card">
+    <div class="card-header p-2">
+        <ul class="nav nav-pills">
+            <li class="nav-item"><a class="nav-link {{#if (eq status 'PENDING')}}active{{/if}}" href="/cms/documents?status=PENDING">Chờ duyệt <span class="badge badge-light">{{countByStatus.PENDING}}</span></a></li>
+            <li class="nav-item"><a class="nav-link {{#if (eq status 'REJECTED')}}active{{/if}}" href="/cms/documents?status=REJECTED">Bị từ chối <span class="badge badge-light">{{countByStatus.REJECTED}}</span></a></li>
+            <li class="nav-item"><a class="nav-link {{#if (eq status 'ACTIVE')}}active{{/if}}" href="/cms/documents?status=ACTIVE">Đang hiển thị <span class="badge badge-light">{{countByStatus.ACTIVE}}</span></a></li>
+            <li class="nav-item"><a class="nav-link {{#if (eq status 'INACTIVE')}}active{{/if}}" href="/cms/documents?status=INACTIVE">Đã ẩn <span class="badge badge-light">{{countByStatus.INACTIVE}}</span></a></li>
+        </ul>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover">
+            <thead><tr><th>Tài liệu</th><th>Khoa › Ngành › Môn</th><th>Người đăng</th><th>Ngày đăng</th></tr></thead>
+            <tbody>
+            {{#each documents}}
+            <tr>
+                <td><a href="/cms/documents/{{id}}">{{title}}</a></td>
+                <td>{{#if subject.major}}{{subject.major.faculty.code}} › {{subject.major.code}} › {{/if}}{{subject.title}}{{#unless subject.major}} <span class="text-muted">(môn chưa thuộc ngành)</span>{{/unless}}</td>
+                <td>{{author.username}}<div class="text-muted small">{{author.email}}</div></td>
+                <td>{{moment createdAt "DD/MM/YYYY HH:mm:ss"}}</td>
+            </tr>
+            {{else}}
+            <tr><td colspan="4" class="text-muted p-3">Không có tài liệu nào</td></tr>
+            {{/each}}
+            </tbody>
+        </table>
+    </div>
+    {{> paging}}
+</div>

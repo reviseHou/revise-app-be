@@ -1,0 +1,25 @@
+{{#extend "title"}}Ngành{{/extend}}
+<div class="card">
+    <div class="card-header">
+        <a href="/cms/majors/create" class="btn btn-primary"><i class="fas fa-plus"></i> Tạo mới</a>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered table-hover js-datatable">
+            <thead><tr><th>Mã</th><th>Ngành</th><th>Khoa</th><th>Trạng thái</th><th style="width:170px">Thao tác</th></tr></thead>
+            <tbody>
+            {{#each majors}}
+            <tr>
+                <td>{{code}}</td>
+                <td>{{name}}<div class="text-muted small">{{description}}</div></td>
+                <td>{{faculty.code}} – {{faculty.name}}</td>
+                <td>{{> status_badge status=status}}</td>
+                <td>
+                    <a href="/cms/majors/{{id}}/edit" class="btn btn-sm btn-warning">Sửa</a>
+                    <form method="post" action="/cms/majors/{{id}}/toggle-status" class="d-inline"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}"><button type="submit" class="btn btn-sm btn-default">{{#if (eq status 'ACTIVE')}}Ẩn{{else}}Hiện{{/if}}</button></form>
+                </td>
+            </tr>
+            {{/each}}
+            </tbody>
+        </table>
+    </div>
+</div>

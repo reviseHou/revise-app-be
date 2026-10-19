@@ -1,0 +1,29 @@
+{{#extend "title"}}{{#if major}}Sửa ngành{{else}}Tạo ngành{{/if}}{{/extend}}
+{{#extend "breadcrumb"}}<li class="breadcrumb-item"><a href="/cms/majors">Ngành</a></li>{{/extend}}
+<form method="post" action="{{#if major}}/cms/majors/{{major.id}}{{else}}/cms/majors{{/if}}" class="card card-primary card-outline"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}">
+    <div class="card-body">
+        <div class="form-group">
+            <label for="facultyId">Khoa</label>
+            <select class="form-control" id="facultyId" name="facultyId" required>
+                <option value="">Chọn khoa…</option>
+                {{#each faculties}}<option value="{{id}}" {{#if (eq id @root.major.faculty.id)}}selected{{/if}}>{{code}} – {{name}}</option>{{/each}}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="code">Mã ngành</label>
+            <input type="text" class="form-control" id="code" name="code" value="{{major.code}}" required>
+        </div>
+        <div class="form-group">
+            <label for="name">Tên ngành</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{major.name}}" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Mô tả</label>
+            <input type="text" class="form-control" id="description" name="description" value="{{major.description}}">
+        </div>
+    </div>
+    <div class="card-footer">
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a href="/cms/majors" class="btn btn-default">Quay lại</a>
+    </div>
+</form>

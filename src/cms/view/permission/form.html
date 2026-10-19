@@ -1,0 +1,14 @@
+{{#extend "title"}}Tạo quyền{{/extend}}
+{{#extend "breadcrumb"}}<li class="breadcrumb-item"><a href="/cms/permissions">Quyền</a></li>{{/extend}}
+<form method="post" action="/cms/permissions" class="card card-primary card-outline"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}">
+    <div class="card-body">
+        <div class="form-group">
+            <label for="name">Tên quyền</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Ví dụ: READ_QUIZ" required>
+        </div>
+    </div>
+    <div class="card-footer">
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a href="/cms/permissions" class="btn btn-default">Quay lại</a>
+    </div>
+</form>

@@ -1,0 +1,25 @@
+{{#extend "title"}}Sửa người dùng{{/extend}}
+{{#extend "breadcrumb"}}<li class="breadcrumb-item"><a href="/cms/users">Người dùng</a></li>{{/extend}}
+<form method="post" action="/cms/users/{{account.id}}/role" class="card card-primary card-outline"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}">
+    <div class="card-body">
+        <div class="form-group">
+            <label for="username">Tên</label>
+            <input type="text" class="form-control" id="username" value="{{account.username}}" disabled>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="text" class="form-control" id="email" value="{{account.email}}" disabled>
+        </div>
+        <div class="form-group">
+            <label for="roleId">Vai trò</label>
+            <select class="form-control" id="roleId" name="roleId">
+                <option value="">(không có vai trò)</option>
+                {{#each roles}}<option value="{{id}}" {{#if (eq id @root.account.role.id)}}selected{{/if}}>{{name}}</option>{{/each}}
+            </select>
+        </div>
+    </div>
+    <div class="card-footer">
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a href="/cms/users" class="btn btn-default">Quay lại</a>
+    </div>
+</form>

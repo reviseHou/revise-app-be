@@ -1,0 +1,15 @@
+{{#extend "title"}}{{#if role}}Sửa vai trò{{else}}Tạo vai trò{{/if}}{{/extend}}
+{{#extend "breadcrumb"}}<li class="breadcrumb-item"><a href="/cms/roles">Vai trò</a></li>{{/extend}}
+<form method="post" action="{{#if role}}/cms/roles/{{role.id}}{{else}}/cms/roles{{/if}}" class="card card-primary card-outline"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}">
+    <div class="card-body">
+        <div class="form-group">
+            <label for="name">Tên vai trò</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{role.name}}" placeholder="Ví dụ: LECTURER" required>
+        </div>
+        {{#if role}}<p class="text-muted mb-0">Quyền của vai trò được gán bằng nút "Gán quyền" ở danh sách vai trò.</p>{{/if}}
+    </div>
+    <div class="card-footer">
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a href="/cms/roles" class="btn btn-default">Quay lại</a>
+    </div>
+</form>

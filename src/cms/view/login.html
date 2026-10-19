@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đăng nhập · ReviseHOU CMS</title>
+    <link rel="stylesheet" href="/cms/resources/adminlte/css/adminlte.min.css">
+    <link rel="stylesheet" href="/cms/resources/plugin/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="/cms/resources/css/cms.css">
+</head>
+<body class="hold-transition login-page">
+<div class="login-box">
+    <div class="login-logo"><b>Revise</b>HOU CMS</div>
+    <div class="card">
+        <div class="card-body login-card-body">
+            {{> alert}}
+            <p class="login-box-msg">Đăng nhập để quản trị hệ thống</p>
+            <div class="social-auth-links text-center">
+                <a href="/api/auth/google?from=cms" class="btn btn-block btn-danger"><i class="fab fa-google mr-2"></i> Đăng nhập bằng tài khoản HOU (Google)</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

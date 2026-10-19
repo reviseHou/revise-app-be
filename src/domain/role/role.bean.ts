@@ -1,0 +1,76 @@
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { RoleForm } from '../forms';
+import { PermissionBean } from '../permission/permission.bean';
+import { Roles } from './entity/role.entity';
+
+@Injectable()
+export class RoleBean {
+  constructor(
+    @InjectRepository(Roles)
+    private readonly roleRepository: Repository<Roles>,
+    private readonly permissionBean: PermissionBean,
+  ) {}
+
+  findAll() {
+    return this.roleRepository.find({ order: { id: 'ASC' } });
+  }
+
+  findAllWithPermissions() {
+    return this.roleRepository.find({
+      relations: ['permissions'],
+      order: { id: 'ASC' },
+    });
+  }
+
+  async findById(id: number) {
+    const role = await this.roleRepository.findOne({
+      where: { id },
+      relations: ['permissions'],
+    });
+    if (!role) throw new NotFoundException('Không tìm thấy vai trò');
+    return role;
+  }
+
+  async create(form: RoleForm) {
+    const name = await this.readValidName(form);
+    return this.roleRepository.save(this.roleRepository.create({ name }));
+  }
+
+  async rename(id: number, form: RoleForm) {
+    const role = await this.findById(id);
+    role.name = await this.readValidName(form, id);
+    return this.roleRepository.save(role);
+  }
+
+  async assignPermissions(id: number, form: RoleForm) {
+    const role = await this.findById(id);
+    const permissionIds = (form?.permissionIds ?? []).map(Number);
+    role.permissions = await this.permissionBean.findByIds(permissionIds);
+    return this.roleRepository.save(role);
+  }
+
+  async remove(id: number) {
+    const role = await this.findById(id);
+    await this.roleRepository.remove(role);
+    return role;
+  }
+
+  private async readValidName(form: RoleForm, ownId?: number) {
+    const name = (form.name ?? '').trim();
+    if (!name) throw new BadRequestException('Cần nhập tên vai trò');
+    const sameName = await this.roleRepository
+      .createQueryBuilder('role')
+      .where('LOWER(role.name) = LOWER(:name)', { name })
+      .getOne();
+    if (sameName && sameName.id !== ownId) {
+      throw new BadRequestException(`Vai trò ${name} đã tồn tại`);
+    }
+    return name;
+  }
+}

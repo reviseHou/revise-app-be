@@ -1,14 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Users } from './users/entity/user.entity';
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/user.module';
-import { Roles } from './roles/entity/roles.entity';
-import { Permissions } from './permissions/entity/permissions.entity';
-import { SubjectsModule } from './subjects/subjects.module';
-import { DocumentsModule } from './documents/document.module';
-import { UploadModule } from './upload/upload.module';
+import { Users } from 'src/domain/user/entity/user.entity';
+import { AuthModule } from './domain/auth/auth.module';
+import { UsersModule } from './domain/user/user.module';
+import { Roles } from 'src/domain/role/entity/role.entity';
+import { Permissions } from 'src/domain/permission/entity/permission.entity';
+import { SubjectsModule } from './domain/subject/subjects.module';
+import { DocumentsModule } from './domain/document/document.module';
+import { UploadModule } from './domain/upload/upload.module';
+import { CmsModule } from './cms/cms.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { UploadModule } from './upload/upload.module';
     SubjectsModule,
     DocumentsModule,
     UploadModule,
+    CmsModule,
   ],
 })
 export class AppModule {}

@@ -1,0 +1,52 @@
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <a href="/cms" class="brand-link">
+        <i class="fas fa-graduation-cap brand-image"></i>
+        <span class="brand-text font-weight-light">ReviseHOU CMS</span>
+    </a>
+    <div class="sidebar">
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column nav-flat" data-widget="treeview" role="menu" data-accordion="false">
+                <li class="nav-item">
+                    <a href="/cms" class="nav-link {{#if (eq path '/cms')}}active{{/if}}">
+                        <i class="nav-icon fas fa-chart-bar"></i><p>Thống kê</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/cms/faculties" class="nav-link {{#if (contains path '/cms/faculties')}}active{{/if}}">
+                        <i class="nav-icon fas fa-university"></i><p>Khoa</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/cms/majors" class="nav-link {{#if (contains path '/cms/majors')}}active{{/if}}">
+                        <i class="nav-icon fas fa-sitemap"></i><p>Ngành</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/cms/subjects" class="nav-link {{#if (contains path '/cms/subjects')}}active{{/if}}">
+                        <i class="nav-icon fas fa-book"></i><p>Môn học</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/cms/documents" class="nav-link {{#if (contains path '/cms/documents')}}active{{/if}}">
+                        <i class="nav-icon fas fa-check-double"></i><p>Duyệt tài liệu</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/cms/users" class="nav-link {{#if (contains path '/cms/users')}}active{{/if}}">
+                        <i class="nav-icon fas fa-users"></i><p>Người dùng</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/cms/roles" class="nav-link {{#if (contains path '/cms/roles')}}active{{/if}}">
+                        <i class="nav-icon fas fa-user-lock"></i><p>Vai trò</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/cms/permissions" class="nav-link {{#if (contains path '/cms/permissions')}}active{{/if}}">
+                        <i class="nav-icon fas fa-key"></i><p>Quyền</p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</aside>

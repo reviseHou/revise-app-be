@@ -1,9 +1,12 @@
+import { Logger, RequestMethod } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import { setupSession } from './cms/config/session.config';
+import { setupViews } from './cms/config/view.config';
 dotenv.config();
 
 async function bootstrap() {
@@ -11,7 +14,14 @@ async function bootstrap() {
   app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/uploads',
   });
-  app.setGlobalPrefix('api');
+  setupSession(app);
+  setupViews(app);
+  app.setGlobalPrefix('api', {
+    exclude: [
+      { path: 'cms', method: RequestMethod.ALL },
+      { path: 'cms/{*path}', method: RequestMethod.ALL },
+    ],
+  });
 
   const corsOptions = {
     origin: ['https://revise-hou.tech', 'http://localhost:5173'],
@@ -43,6 +53,8 @@ async function bootstrap() {
     customSiteTitle: 'REVISE-HOU API Docs',
   });
 
-  await app.listen(process.env.PORT ?? 4000);
+  const port = process.env.PORT ?? 4000;
+  await app.listen(port);
+  Logger.log(`CMS: http://localhost:${port}/cms`, 'Bootstrap');
 }
 bootstrap();

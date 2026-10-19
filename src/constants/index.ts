@@ -4,4 +4,6 @@ export const TABLES_NAME = {
   PERMISSIONS: 'permissions',
   SUBJECTS: 'subjects',
   DOCUMENTS: 'documents',
+  FACULTIES: 'faculties',
+  MAJORS: 'majors',
 };
