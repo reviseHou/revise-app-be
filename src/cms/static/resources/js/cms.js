@@ -11,9 +11,11 @@ $(function () {
     var $info = $('#info');
     if ($info.length) {
         $(document).Toasts('create', {
-            class: $info.data('type') === 'success' ? 'bg-success' : 'bg-danger',
-            body: $('<div>').text($info.attr('data-content')).html(),
+            class: $info.data('type') === 'success' ? 'toast-success' : 'toast-error',
+            body: '<i class="fas ' + ($info.data('type') === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle') + '"></i><span>' +
+                $('<div>').text($info.attr('data-content')).html() + '</span>',
             position: 'topRight',
+            close: false,
             autohide: true,
             delay: 5000
         });

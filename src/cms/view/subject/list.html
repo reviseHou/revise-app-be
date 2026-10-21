@@ -23,7 +23,7 @@
                 <td>{{> status_badge status=status}}</td>
                 <td class="action-cell">
                     <a href="/cms/subjects/{{id}}/edit" class="btn-icon" title="Chỉnh sửa"><i class="fas fa-pen"></i></a>
-                    <form method="post" action="/cms/subjects/{{id}}/toggle-status" class="d-inline"><button type="submit" class="btn-icon" title="{{#if (eq status 'ACTIVE')}}Ẩn{{else}}Hiện{{/if}}"><i class="fas {{#if (eq status 'ACTIVE')}}fa-eye-slash{{else}}fa-eye{{/if}}"></i></button></form>
+                    <button type="button" class="btn-icon" title="{{#if (eq status 'ACTIVE')}}Ẩn{{else}}Hiện{{/if}}" data-delete-action="/cms/subjects/{{id}}/toggle-status" data-confirm-title="Bạn có chắc chắn muốn {{#if (eq status 'ACTIVE')}}ẩn{{else}}hiện{{/if}} không?" data-delete-name="{{title}}"><i class="fas {{#if (eq status 'ACTIVE')}}fa-eye-slash{{else}}fa-eye{{/if}}"></i></button>
                     <button type="button" class="btn-icon danger" title="Xóa" data-delete-action="/cms/subjects/{{id}}/delete" data-delete-name="{{title}}"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>

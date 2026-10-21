@@ -223,3 +223,10 @@ body, .content-wrapper { background: var(--hou-bg); }
 .content-wrapper > .content { padding-bottom: 2.5rem; }
 .main-footer { margin-top: 0; }
 .chart-box { position: relative; height: 280px; }
+#toastsContainerTopRight { top: 4.5rem; right: 1rem; }
+#toastsContainerTopRight .toast { width: 320px; max-width: 90vw; background: #fff; color: #1f2937; border: 0; border-left: 4px solid; border-radius: 8px; box-shadow: 0 6px 20px rgba(0, 0, 0, .12); opacity: 1; }
+#toastsContainerTopRight .toast-success { border-left-color: #3aa76d; }
+#toastsContainerTopRight .toast-error { border-left-color: #e05d5d; }
+#toastsContainerTopRight .toast-body { display: flex; align-items: center; gap: .6rem; padding: .75rem 1rem; font-size: .9rem; }
+#toastsContainerTopRight .toast-success .fas { color: #3aa76d; font-size: 1.1rem; }
+#toastsContainerTopRight .toast-error .fas { color: #e05d5d; font-size: 1.1rem; }
