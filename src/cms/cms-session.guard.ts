@@ -6,7 +6,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { canEnterCms } from 'src/domain/auth/auth.constants';
+import { canEnterCms } from './util/cms.auth';
 import { UsersService } from 'src/domain/user/users.service';
 import type { CmsRequest } from './util/cms.helper';
 

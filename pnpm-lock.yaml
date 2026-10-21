@@ -38,15 +38,9 @@ importers:
       class-validator:
         specifier: ^0.15.1
         version: 0.15.1
-      connect-flash:
-        specifier: ^0.1.1
-        version: 0.1.1
       connect-pg-simple:
         specifier: ^10.0.0
         version: 10.0.0
-      csrf-sync:
-        specifier: ^4.2.1
-        version: 4.2.1
       dotenv:
         specifier: ^17.3.1
         version: 17.3.1
@@ -99,9 +93,6 @@ importers:
       '@nestjs/testing':
         specifier: ^11.0.1
         version: 11.1.17(@nestjs/common@11.1.17(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(@nestjs/platform-express@11.1.17)
-      '@types/connect-flash':
-        specifier: ^0.0.40
-        version: 0.0.40
       '@types/connect-pg-simple':
         specifier: ^7.0.3
         version: 7.0.3
@@ -917,9 +908,6 @@ packages:
 
   '@types/body-parser@1.19.6':
     resolution: {integrity: sha512-HLFeCYgz89uk22N5Qg3dvGvsv46B8GLvKKo1zKG4NybA8U2DiEO3w9lqGg29t/tfLRJpJ6iQxnVw4OnB7MoM9g==}
-
-  '@types/connect-flash@0.0.40':
-    resolution: {integrity: sha512-vqGDzZ85Kyu/tKdDwXP6JCz4i2Xp3o4bYHSCXbF7XiL1HohogtGXG5pgbgypVbdO3DYqCOHIiZhp2Gh5fP2dDw==}
 
   '@types/connect-pg-simple@7.0.3':
     resolution: {integrity: sha512-NGCy9WBlW2bw+J/QlLnFZ9WjoGs6tMo3LAut6mY4kK+XHzue//lpNVpAvYRpIwM969vBRAM2Re0izUvV6kt+NA==}
@@ -1758,10 +1746,6 @@ packages:
   concat-with-sourcemaps@1.1.0:
     resolution: {integrity: sha512-4gEjHJFT9e+2W/77h/DS5SGUgwDaOwprX8L/gl5+3ixnzkVJJsZWDSelmN3Oilw3LNDZjZV0yqH1hLG3k6nghg==}
 
-  connect-flash@0.1.1:
-    resolution: {integrity: sha512-2rcfELQt/ZMP+SM/pG8PyhJRaLKp+6Hk2IUBNkEit09X+vwn3QsAL3ZbYtxUn7NVPzbMTSLRDhqe0B/eh30RYA==}
-    engines: {node: '>= 0.4.0'}
-
   connect-pg-simple@10.0.0:
     resolution: {integrity: sha512-pBGVazlqiMrackzCr0eKhn4LO5trJXsOX0nQoey9wCOayh80MYtThCbq8eoLsjpiWgiok/h+1/uti9/2/Una8A==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=22.0.0}
@@ -1825,9 +1809,6 @@ packages:
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
-
-  csrf-sync@4.2.1:
-    resolution: {integrity: sha512-+q9tlUSCi/kbwr1NYwn5+MeuNhwxz3wSv1yl42BgIWfIuErZ3HajRwzvZTkfiyIqt1PZT8lQSlffhSYjCneN7g==}
 
   date.js@0.3.3:
     resolution: {integrity: sha512-HgigOS3h3k6HnW011nAb43c5xx5rBXk8P2v/WIT9Zv4koIaVXiH2BURguI78VVp+5Qc076T7OR378JViCnZtBw==}
@@ -5060,10 +5041,6 @@ snapshots:
       '@types/connect': 3.4.38
       '@types/node': 22.19.15
 
-  '@types/connect-flash@0.0.40':
-    dependencies:
-      '@types/express': 5.0.6
-
   '@types/connect-pg-simple@7.0.3':
     dependencies:
       '@types/express': 5.0.6
@@ -6014,8 +5991,6 @@ snapshots:
     dependencies:
       source-map: 0.6.1
 
-  connect-flash@0.1.1: {}
-
   connect-pg-simple@10.0.0:
     dependencies:
       pg: 8.20.0
@@ -6070,10 +6045,6 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
-
-  csrf-sync@4.2.1:
-    dependencies:
-      http-errors: 2.0.1
 
   date.js@0.3.3:
     dependencies:

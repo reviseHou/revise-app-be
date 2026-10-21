@@ -12,6 +12,7 @@ import { RefreshTokenDto } from './dto/auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import type { Request, Response } from 'express';
+import { startCmsSession } from 'src/cms/util/cms.auth';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const HOU_EMAIL = /^[^@]+@([a-zA-Z0-9_\-]+\.)*hou\.edu\.vn$/;
@@ -54,13 +55,15 @@ export class AuthController {
 
   private async loginCms(req: Request, res: Response) {
     const googleUser = req.user as { email?: string } | undefined;
-    const toLogin = (error: string) =>
-      res.redirect(`/cms/login?error=${encodeURIComponent(error)}`);
+    const toLogin = (content: string) => {
+      req.session.info = { type: 'error', content };
+      return res.redirect('/cms/login');
+    };
     if (!googleUser?.email || !HOU_EMAIL.test(googleUser.email)) {
       return toLogin('Chỉ chấp nhận tài khoản email của trường');
     }
     const { user } = await this.authService.loginWithGoogle(googleUser);
-    return (await this.authService.startCmsSession(req, user))
+    return (await startCmsSession(req, user))
       ? res.redirect('/cms')
       : toLogin('Tài khoản không có quyền vào CMS');
   }

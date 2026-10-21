@@ -38,32 +38,19 @@ function shareRequestWithViews(
 ) {
   const [path, queryText] = request.originalUrl.split('?');
   const otherParams = new URLSearchParams(queryText);
-  ['page', 'success', 'error'].forEach((name) => otherParams.delete(name));
+  otherParams.delete('page');
   const otherQuery = otherParams.toString();
 
   response.locals.path = path;
   response.locals.pageBase = `${path}?${otherQuery}${otherQuery ? '&' : ''}`;
   response.locals.pageSize = PAGE_SIZE;
-  Object.defineProperty(response.locals, 'alert', {
-    enumerable: true,
-    get: () => readAlert(request),
-  });
+  response.locals.info = request.session.info;
+  delete request.session.info;
   Object.defineProperty(response.locals, 'user', {
     enumerable: true,
     get: () => request.user,
   });
   next();
-}
-
-function readAlert(request: CmsRequest) {
-  const fromQuery = (name: string) => {
-    const value = request.query[name];
-    return typeof value === 'string' ? value : '';
-  };
-  return {
-    success: request.flash('success')[0] ?? fromQuery('success'),
-    error: request.flash('error')[0] ?? fromQuery('error'),
-  };
 }
 
 function registerLayoutHelpers() {

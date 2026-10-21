@@ -21,11 +21,14 @@ export class FlashRedirectInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       map((message: string) => {
-        request.flash('success', message);
+        request.session.info = { type: 'success', content: message };
         return { url: to };
       }),
       catchError((error) => {
-        request.flash('error', toErrorMessage(error));
+        request.session.info = {
+          type: 'error',
+          content: toErrorMessage(error),
+        };
         return of({ url: errorUrl });
       }),
     );

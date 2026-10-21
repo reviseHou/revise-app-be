@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
-import { CMS_SESSION_COOKIE } from 'src/domain/auth/auth.constants';
+import { CMS_SESSION_COOKIE } from '../util/cms.auth';
 import { CmsErrorFilter } from '../error.filter';
 
 @Controller('cms')

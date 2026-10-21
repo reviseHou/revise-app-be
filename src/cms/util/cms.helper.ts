@@ -10,16 +10,6 @@ export const GENERIC_ERROR_MESSAGE = 'Đã có lỗi xảy ra, vui lòng thử l
 
 const logger = new Logger('CMS');
 
-export function withAlert(
-  url: string,
-  alert: { success?: string; error?: string },
-) {
-  const key = alert.error ? 'error' : 'success';
-  const message = alert.error ?? alert.success ?? '';
-  const separator = url.includes('?') ? '&' : '?';
-  return `${url}${separator}${key}=${encodeURIComponent(message)}`;
-}
-
 function readErrorMessage(exception: HttpException) {
   const body = exception.getResponse() as
     | string

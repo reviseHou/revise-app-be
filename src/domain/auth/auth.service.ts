@@ -1,8 +1,5 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import type { Request } from 'express';
-import { canEnterCms } from './auth.constants';
-import { Users } from '../user/entity/user.entity';
 import { UsersService } from '../user/users.service';
 import { RefreshTokenDto } from './dto/auth.dto';
 
@@ -50,20 +47,6 @@ export class AuthService {
       }),
       user,
     };
-  }
-
-  async startCmsSession(request: Request, user: Users): Promise<boolean> {
-    if (!canEnterCms(user)) return false;
-    await new Promise<void>((resolve, reject) =>
-      request.session.regenerate((error) =>
-        error ? reject(error) : resolve(),
-      ),
-    );
-    request.session.userId = user.id;
-    await new Promise<void>((resolve, reject) =>
-      request.session.save((error) => (error ? reject(error) : resolve())),
-    );
-    return true;
   }
 
   async refreshToken(dto: RefreshTokenDto) {

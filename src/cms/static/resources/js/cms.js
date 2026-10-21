@@ -8,7 +8,16 @@ $(function () {
 
     $('[title]').tooltip({ trigger: 'hover' });
 
-    setTimeout(function () { $('.js-auto-close').alert('close'); }, 4000);
+    var $info = $('#info');
+    if ($info.length) {
+        $(document).Toasts('create', {
+            class: $info.data('type') === 'success' ? 'bg-success' : 'bg-danger',
+            body: $('<div>').text($info.attr('data-content')).html(),
+            position: 'topRight',
+            autohide: true,
+            delay: 5000
+        });
+    }
 
     setUpPermissionsPicker();
 });

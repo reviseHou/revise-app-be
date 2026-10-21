@@ -1,13 +1,13 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import connectPgSimple from 'connect-pg-simple';
-import flash from 'connect-flash';
 import session from 'express-session';
 import { Pool } from 'pg';
-import { CMS_SESSION_COOKIE } from 'src/domain/auth/auth.constants';
+import { CMS_SESSION_COOKIE } from '../util/cms.auth';
 
 declare module 'express-session' {
   interface SessionData {
     userId?: number;
+    info?: { type: 'success' | 'error'; content: string };
   }
 }
 
@@ -48,5 +48,4 @@ export function setupSession(app: NestExpressApplication) {
       },
     }),
   );
-  app.use('/cms', flash());
 }

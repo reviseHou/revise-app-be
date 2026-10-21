@@ -8,15 +8,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import type { Response } from 'express';
-import {
-  canEnterCms,
-  CMS_SESSION_COOKIE,
-} from 'src/domain/auth/auth.constants';
-import {
-  CmsRequest,
-  GENERIC_ERROR_MESSAGE,
-  withAlert,
-} from './util/cms.helper';
+import { canEnterCms } from './util/cms.auth';
+import { CmsRequest, GENERIC_ERROR_MESSAGE } from './util/cms.helper';
 
 const LOGIN_URL = '/cms/login';
 
@@ -29,7 +22,7 @@ export class CmsErrorFilter implements ExceptionFilter {
     const response = host.switchToHttp().getResponse<Response>();
 
     if (exception instanceof UnauthorizedException) {
-      return this.logOut(request, response, LOGIN_URL);
+      return this.logOut(request, response);
     }
     if (exception instanceof ForbiddenException) {
       return this.handleForbidden(request, response);
@@ -43,19 +36,15 @@ export class CmsErrorFilter implements ExceptionFilter {
 
   private handleForbidden(request: CmsRequest, response: Response) {
     if (!canEnterCms(request.user)) {
-      return this.logOut(
-        request,
-        response,
-        withAlert(LOGIN_URL, { error: 'Tài khoản không có quyền vào CMS' }),
-      );
+      return this.logOut(request, response, 'Tài khoản không có quyền vào CMS');
     }
     return this.showError(response, 403, 'Forbidden');
   }
 
-  private logOut(request: CmsRequest, response: Response, redirectUrl: string) {
-    request.session.destroy(() => {
-      response.clearCookie(CMS_SESSION_COOKIE);
-      response.redirect(redirectUrl);
+  private logOut(request: CmsRequest, response: Response, error?: string) {
+    request.session.regenerate(() => {
+      if (error) request.session.info = { type: 'error', content: error };
+      response.redirect(LOGIN_URL);
     });
   }
 
