@@ -7,77 +7,34 @@
     <div class="col-lg-3 col-6"><div class="stat-card danger"><span class="stat-icon"><i class="fas fa-exclamation-circle"></i></span><div><div class="stat-label">Chờ duyệt quá {{overdueDays}} ngày</div><div class="stat-value">{{overdueDocumentCount}}</div></div></div></div>
 </div>
 <div class="row">
-    <div class="col-md-4"><div class="stat-card"><span class="stat-icon"><i class="fas fa-university"></i></span><div><div class="stat-label">Khoa</div><div class="stat-value">{{facultyCount}}</div></div></div></div>
-    <div class="col-md-4"><div class="stat-card"><span class="stat-icon"><i class="fas fa-sitemap"></i></span><div><div class="stat-label">Ngành</div><div class="stat-value">{{majorCount}}</div></div></div></div>
-    <div class="col-md-4"><div class="stat-card"><span class="stat-icon"><i class="fas fa-book"></i></span><div><div class="stat-label">Môn học</div><div class="stat-value">{{subjectCount}}</div></div></div></div>
-</div>
-<div class="row">
-    <div class="col-md-6">
+    <div class="col-md-5">
         <div class="card">
             <div class="card-header"><h3 class="card-title">Tài liệu theo trạng thái</h3></div>
-            <div class="card-body p-0"><table class="table table-sm">
-                <tr><td style="width:35%">{{> status_badge status='PENDING'}}</td>
-                    <td><div class="progress progress-xs"><div class="progress-bar" style="width: {{percent documentCountByStatus.PENDING documentCount}}%"></div></div></td>
-                    <td class="text-right"><b>{{documentCountByStatus.PENDING}}</b></td></tr>
-                <tr><td>{{> status_badge status='REJECTED'}}</td>
-                    <td><div class="progress progress-xs"><div class="progress-bar" style="width: {{percent documentCountByStatus.REJECTED documentCount}}%"></div></div></td>
-                    <td class="text-right"><b>{{documentCountByStatus.REJECTED}}</b></td></tr>
-                <tr><td>{{> status_badge status='ACTIVE'}}</td>
-                    <td><div class="progress progress-xs"><div class="progress-bar" style="width: {{percent documentCountByStatus.ACTIVE documentCount}}%"></div></div></td>
-                    <td class="text-right"><b>{{documentCountByStatus.ACTIVE}}</b></td></tr>
-                <tr><td>{{> status_badge status='INACTIVE'}}</td>
-                    <td><div class="progress progress-xs"><div class="progress-bar" style="width: {{percent documentCountByStatus.INACTIVE documentCount}}%"></div></div></td>
-                    <td class="text-right"><b>{{documentCountByStatus.INACTIVE}}</b></td></tr>
-            </table></div>
+            <div class="card-body chart-box"><canvas id="statusChart"></canvas></div>
         </div>
     </div>
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Tài liệu theo tháng</h3></div>
+            <div class="card-body chart-box"><canvas id="monthChart"></canvas></div>
+        </div>
+    </div>
+</div>
+<div class="row">
     <div class="col-md-6">
         <div class="card">
             <div class="card-header"><h3 class="card-title">Tài liệu theo khoa</h3></div>
-            <div class="card-body p-0"><table class="table table-sm">
-                {{#each documentCountByFaculty}}
-                <tr><td style="width:40%">{{name}}</td>
-                    <td><div class="progress progress-xs"><div class="progress-bar" style="width: {{percent count ../documentCount}}%"></div></div></td>
-                    <td class="text-right"><b>{{count}}</b></td></tr>
-                {{else}}<tr><td class="text-muted p-3">Chưa có dữ liệu</td></tr>{{/each}}
-            </table></div>
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header"><h3 class="card-title">Tài liệu theo tháng ({{monthsShown}} tháng gần nhất)</h3></div>
-            <div class="card-body p-0"><table class="table table-sm">
-                {{#each documentCountByMonth}}
-                <tr><td style="width:30%">{{name}}</td>
-                    <td><div class="progress progress-xs"><div class="progress-bar" style="width: {{percent count ../documentCount}}%"></div></div></td>
-                    <td class="text-right"><b>{{count}}</b></td></tr>
-                {{else}}<tr><td class="text-muted p-3">Chưa có dữ liệu</td></tr>{{/each}}
-            </table></div>
+            <div class="card-body chart-box"><canvas id="facultyChart"></canvas></div>
         </div>
     </div>
     <div class="col-md-6">
         <div class="card">
             <div class="card-header"><h3 class="card-title">Người đóng góp nhiều nhất</h3></div>
-            <div class="card-body p-0"><table class="table table-sm">
-                {{#each topUploaders}}
-                <tr><td style="width:40%">{{name}}</td>
-                    <td><div class="progress progress-xs"><div class="progress-bar" style="width: {{percent count ../documentCount}}%"></div></div></td>
-                    <td class="text-right"><b>{{count}}</b></td></tr>
-                {{else}}<tr><td class="text-muted p-3">Chưa có tài liệu đang hiển thị</td></tr>{{/each}}
-            </table></div>
-        </div>
-        <div class="card">
-            <div class="card-header"><h3 class="card-title">Người dùng theo vai trò</h3></div>
-            <div class="card-body p-0"><table class="table table-sm">
-                {{#each userCountByRole}}
-                <tr><td style="width:40%">{{roleName}}</td>
-                    <td><div class="progress progress-xs"><div class="progress-bar" style="width: {{percent count ../userCount}}%"></div></div></td>
-                    <td class="text-right"><b>{{count}}</b></td></tr>
-                {{else}}<tr><td class="text-muted p-3">Chưa có người dùng</td></tr>{{/each}}
-            </table></div>
+            <div class="card-body chart-box"><canvas id="uploaderChart"></canvas></div>
         </div>
     </div>
 </div>
 <p class="text-muted">Lượt xem, bài kiểm tra và đánh giá chưa có trong hệ thống nên chưa thống kê được.</p>
+<script type="application/json" id="chartData">{{{chartData}}}</script>
+<script src="/cms/resources/plugin/chartjs/chart.umd.min.js"></script>
+<script src="/cms/resources/js/home-charts.js"></script>

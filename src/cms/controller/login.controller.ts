@@ -6,12 +6,10 @@ import {
   Req,
   Res,
   UseFilters,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { CMS_SESSION_COOKIE } from 'src/domain/auth/auth.constants';
-import { CsrfGuard } from '../csrf.guard';
 import { CmsErrorFilter } from '../error.filter';
 
 @Controller('cms')
@@ -25,7 +23,6 @@ export class LoginController {
   }
 
   @Post('logout')
-  @UseGuards(CsrfGuard)
   logout(@Req() request: Request, @Res() response: Response) {
     request.session.destroy(() => {
       response.clearCookie(CMS_SESSION_COOKIE);

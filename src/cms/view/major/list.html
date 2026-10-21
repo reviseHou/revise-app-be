@@ -16,7 +16,7 @@
                 <td>{{> status_badge status=status}}</td>
                 <td class="action-cell">
                     <a href="/cms/majors/{{id}}/edit" class="btn-icon" title="Chỉnh sửa"><i class="fas fa-pen"></i></a>
-                    <form method="post" action="/cms/majors/{{id}}/toggle-status" class="d-inline"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}"><button type="submit" class="btn-icon" title="{{#if (eq status 'ACTIVE')}}Ẩn{{else}}Hiện{{/if}}"><i class="fas {{#if (eq status 'ACTIVE')}}fa-eye-slash{{else}}fa-eye{{/if}}"></i></button></form>
+                    <form method="post" action="/cms/majors/{{id}}/toggle-status" class="d-inline"><button type="submit" class="btn-icon" title="{{#if (eq status 'ACTIVE')}}Ẩn{{else}}Hiện{{/if}}"><i class="fas {{#if (eq status 'ACTIVE')}}fa-eye-slash{{else}}fa-eye{{/if}}"></i></button></form>
                 </td>
             </tr>
             {{/each}}

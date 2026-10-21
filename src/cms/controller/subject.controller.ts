@@ -12,7 +12,7 @@ import type { SubjectForm } from 'src/domain/forms';
 import { MajorBean } from 'src/domain/major/major.bean';
 import { SubjectBean } from 'src/domain/subject/subject.bean';
 import { CmsAction, CmsController, CmsView } from '../cms.decorator';
-import { CmsPermission } from '../cms.permission';
+import { CmsPermission } from '../util/cms.permission';
 
 const LIST = '/cms/subjects';
 

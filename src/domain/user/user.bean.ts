@@ -24,10 +24,6 @@ export class UserBean {
     return this.userRepository.count();
   }
 
-  countWithRole(roleId: number) {
-    return this.userRepository.count({ where: { role: { id: roleId } } });
-  }
-
   async countByRole(): Promise<UserCountOfRole[]> {
     const rows = await this.userRepository
       .createQueryBuilder('user')

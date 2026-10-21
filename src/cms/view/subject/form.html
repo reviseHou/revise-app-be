@@ -1,6 +1,6 @@
 {{#extend "title"}}{{#if subject}}Sửa môn học{{else}}Tạo môn học{{/if}}{{/extend}}
 {{#extend "breadcrumb"}}<li class="breadcrumb-item"><a href="/cms/subjects">Môn học</a></li>{{/extend}}
-<form method="post" action="{{#if subject}}/cms/subjects/{{subject.id}}{{else}}/cms/subjects{{/if}}" class="card card-primary card-outline"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}">
+<form method="post" action="{{#if subject}}/cms/subjects/{{subject.id}}{{else}}/cms/subjects{{/if}}" class="card card-primary card-outline">
     <div class="card-body">
         <div class="form-group">
             <label for="majorId">Ngành</label>

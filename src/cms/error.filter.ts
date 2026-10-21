@@ -17,7 +17,6 @@ import {
   GENERIC_ERROR_MESSAGE,
   withAlert,
 } from './util/cms.helper';
-import { CsrfException } from './csrf.guard';
 
 const LOGIN_URL = '/cms/login';
 
@@ -31,9 +30,6 @@ export class CmsErrorFilter implements ExceptionFilter {
 
     if (exception instanceof UnauthorizedException) {
       return this.logOut(request, response, LOGIN_URL);
-    }
-    if (exception instanceof CsrfException) {
-      return this.showError(response, 403, exception.message);
     }
     if (exception instanceof ForbiddenException) {
       return this.handleForbidden(request, response);

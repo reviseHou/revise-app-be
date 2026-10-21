@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Get,
   Param,
@@ -13,7 +12,7 @@ import { PermissionBean } from 'src/domain/permission/permission.bean';
 import { RoleBean } from 'src/domain/role/role.bean';
 import { UserBean } from 'src/domain/user/user.bean';
 import { CmsAction, CmsController, CmsView } from '../cms.decorator';
-import { CmsPermission } from '../cms.permission';
+import { CmsPermission } from '../util/cms.permission';
 
 const LIST = '/cms/roles';
 
@@ -92,17 +91,7 @@ export class RoleController {
   @Post(':id/delete')
   @CmsAction(CmsPermission.DELETE_ROLE, { to: LIST })
   async deleteRole(@Param('id', ParseIntPipe) id: number) {
-    await this.assertRoleHasNoUsers(id);
     const role = await this.roleBean.remove(id);
     return `Đã xóa vai trò ${role.name}`;
-  }
-
-  private async assertRoleHasNoUsers(roleId: number) {
-    const userCount = await this.userBean.countWithRole(roleId);
-    if (userCount > 0) {
-      throw new BadRequestException(
-        `Vai trò đang gán cho ${userCount} người dùng, hãy gán lại trước khi xóa`,
-      );
-    }
   }
 }

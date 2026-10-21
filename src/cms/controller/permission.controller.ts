@@ -9,7 +9,7 @@ import {
 import type { PermissionForm } from 'src/domain/forms';
 import { PermissionBean } from 'src/domain/permission/permission.bean';
 import { CmsAction, CmsController, CmsView } from '../cms.decorator';
-import { CmsPermission } from '../cms.permission';
+import { CmsPermission } from '../util/cms.permission';
 
 const LIST = '/cms/permissions';
 

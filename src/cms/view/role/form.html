@@ -1,6 +1,6 @@
 {{#extend "title"}}{{#if role}}Sửa vai trò{{else}}Tạo vai trò{{/if}}{{/extend}}
 {{#extend "breadcrumb"}}<li class="breadcrumb-item"><a href="/cms/roles">Vai trò</a></li>{{/extend}}
-<form method="post" action="{{#if role}}/cms/roles/{{role.id}}{{else}}/cms/roles{{/if}}" class="card card-primary card-outline"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}">
+<form method="post" action="{{#if role}}/cms/roles/{{role.id}}{{else}}/cms/roles{{/if}}" class="card card-primary card-outline">
     <div class="card-body">
         <div class="form-group">
             <label for="name">Tên vai trò</label>

@@ -1,6 +1,6 @@
 {{#extend "title"}}{{#if faculty}}Sửa khoa{{else}}Tạo khoa{{/if}}{{/extend}}
 {{#extend "breadcrumb"}}<li class="breadcrumb-item"><a href="/cms/faculties">Khoa</a></li>{{/extend}}
-<form method="post" action="{{#if faculty}}/cms/faculties/{{faculty.id}}{{else}}/cms/faculties{{/if}}" class="card card-primary card-outline"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}">
+<form method="post" action="{{#if faculty}}/cms/faculties/{{faculty.id}}{{else}}/cms/faculties{{/if}}" class="card card-primary card-outline">
     <div class="card-body">
         <div class="form-group">
             <label for="code">Mã khoa</label>

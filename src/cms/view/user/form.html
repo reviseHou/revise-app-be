@@ -1,6 +1,6 @@
 {{#extend "title"}}Sửa người dùng{{/extend}}
 {{#extend "breadcrumb"}}<li class="breadcrumb-item"><a href="/cms/users">Người dùng</a></li>{{/extend}}
-<form method="post" action="/cms/users/{{account.id}}/role" class="card card-primary card-outline"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}">
+<form method="post" action="/cms/users/{{account.id}}/role" class="card card-primary card-outline">
     <div class="card-body">
         <div class="form-group">
             <label for="username">Tên</label>

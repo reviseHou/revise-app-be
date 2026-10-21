@@ -13,7 +13,7 @@ import { REVIEW_CRITERIA } from 'src/domain/document/document.criteria';
 import { DocumentStatus } from 'src/domain/enums';
 import type { RejectDocumentForm } from 'src/domain/forms';
 import { CmsAction, CmsController, CmsView } from '../cms.decorator';
-import { CmsPermission } from '../cms.permission';
+import { CmsPermission } from '../util/cms.permission';
 import type { CmsRequest } from '../util/cms.helper';
 
 const DETAIL = '/cms/documents/:id';

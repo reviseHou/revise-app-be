@@ -1,12 +1,7 @@
 $(function () {
-    $(document).on('click', '[data-confirm]', function (e) {
-        if (!window.confirm($(this).data('confirm'))) {
-            e.preventDefault();
-        }
-    });
-
     $(document).on('click', '[data-delete-action]', function () {
         $('#deleteForm').attr('action', $(this).data('delete-action'));
+        $('#deleteTitle').text($(this).data('confirm-title') || 'Bạn có chắc chắn muốn xóa không?');
         $('#deleteName').text($(this).data('delete-name') || '');
         $('#deleteModal').modal('show');
     });

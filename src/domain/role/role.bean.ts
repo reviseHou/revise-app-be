@@ -36,13 +36,6 @@ export class RoleBean {
     return { roles, total };
   }
 
-  findAllWithPermissions() {
-    return this.roleRepository.find({
-      relations: ['permissions'],
-      order: { id: 'ASC' },
-    });
-  }
-
   async findById(id: number) {
     const role = await this.roleRepository.findOne({
       where: { id },
@@ -71,7 +64,16 @@ export class RoleBean {
   }
 
   async remove(id: number) {
-    const role = await this.findById(id);
+    const role = await this.roleRepository.findOne({
+      where: { id },
+      relations: ['users'],
+    });
+    if (!role) throw new NotFoundException('Không tìm thấy vai trò');
+    if (role.users.length) {
+      throw new BadRequestException(
+        `Vai trò ${role.name} đang gán cho ${role.users.length} người dùng, hãy gán lại trước khi xóa`,
+      );
+    }
     await this.roleRepository.remove(role);
     return role;
   }

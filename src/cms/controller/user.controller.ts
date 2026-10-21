@@ -11,7 +11,7 @@ import type { AssignRoleForm } from 'src/domain/forms';
 import { RoleBean } from 'src/domain/role/role.bean';
 import { UserBean } from 'src/domain/user/user.bean';
 import { CmsAction, CmsController, CmsView } from '../cms.decorator';
-import { CmsPermission } from '../cms.permission';
+import { CmsPermission } from '../util/cms.permission';
 
 const LIST = '/cms/users';
 

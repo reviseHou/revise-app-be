@@ -11,8 +11,7 @@ import { ApiExcludeController } from '@nestjs/swagger';
 import { Permissions } from 'src/domain/auth/decorator/permission.decorator';
 import { PermissionsGuard } from 'src/domain/auth/guards/permissions.guard';
 import { CmsSessionGuard } from './cms-session.guard';
-import { CsrfGuard } from './csrf.guard';
-import { CmsPermission } from './cms.permission';
+import { CmsPermission } from './util/cms.permission';
 import { CmsErrorFilter } from './error.filter';
 import {
   FlashRedirectInterceptor,
@@ -22,7 +21,7 @@ import {
 export function CmsController(path: string) {
   return applyDecorators(
     Controller(path),
-    UseGuards(CmsSessionGuard, CsrfGuard, PermissionsGuard),
+    UseGuards(CmsSessionGuard, PermissionsGuard),
     UseFilters(CmsErrorFilter),
     ApiExcludeController(),
   );

@@ -10,7 +10,7 @@ import {
 import { FacultyBean } from 'src/domain/faculty/faculty.bean';
 import type { CatalogForm } from 'src/domain/forms';
 import { CmsAction, CmsController, CmsView } from '../cms.decorator';
-import { CmsPermission } from '../cms.permission';
+import { CmsPermission } from '../util/cms.permission';
 
 const LIST = '/cms/faculties';
 

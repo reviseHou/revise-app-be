@@ -4,7 +4,6 @@ import hbs from 'hbs';
 import helpers from 'handlebars-helpers';
 import { PAGE_SIZE } from 'src/domain/paging';
 import type { CmsRequest } from '../util/cms.helper';
-import { generateToken } from '../util/csrf';
 
 const PAGES_SHOWN_EACH_SIDE = 3;
 
@@ -49,10 +48,6 @@ function shareRequestWithViews(
     enumerable: true,
     get: () => readAlert(request),
   });
-  Object.defineProperty(response.locals, 'csrfToken', {
-    enumerable: true,
-    get: () => generateToken(request),
-  });
   Object.defineProperty(response.locals, 'user', {
     enumerable: true,
     get: () => request.user,
@@ -87,18 +82,10 @@ function registerLayoutHelpers() {
 }
 
 function registerListHelpers() {
-  hbs.registerHelper('percent', (part: number, whole: number) =>
-    whole > 0 ? Math.round((part / whole) * 100) : 0,
-  );
   hbs.registerHelper(
     'userCountOf',
     (rows: { roleId: number | null; count: number }[], roleId: number) =>
       rows.find((row) => row.roleId === roleId)?.count ?? 0,
-  );
-  hbs.registerHelper(
-    'hasPermission',
-    (permissions: { id: number }[], permissionId: number) =>
-      permissions.some((permission) => permission.id === permissionId),
   );
   hbs.registerHelper('pageNumbers', (page: number, total: number) => {
     const lastPage = Math.max(1, Math.ceil(total / PAGE_SIZE));

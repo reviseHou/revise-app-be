@@ -1,6 +1,6 @@
 {{#extend "title"}}{{#if major}}Sửa ngành{{else}}Tạo ngành{{/if}}{{/extend}}
 {{#extend "breadcrumb"}}<li class="breadcrumb-item"><a href="/cms/majors">Ngành</a></li>{{/extend}}
-<form method="post" action="{{#if major}}/cms/majors/{{major.id}}{{else}}/cms/majors{{/if}}" class="card card-primary card-outline"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}">
+<form method="post" action="{{#if major}}/cms/majors/{{major.id}}{{else}}/cms/majors{{/if}}" class="card card-primary card-outline">
     <div class="card-body">
         <div class="form-group">
             <label for="facultyId">Khoa</label>

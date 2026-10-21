@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ActiveStatus } from '../enums';
 import { CatalogForm, SubjectForm } from '../forms';
 import { MajorBean } from '../major/major.bean';
@@ -44,14 +44,6 @@ export class SubjectBean {
     return { subjects, total };
   }
 
-  findAll(facultyId?: number) {
-    return this.subjectRepository.find({
-      where: facultyId ? { major: { faculty: { id: facultyId } } } : {},
-      relations: ['major', 'major.faculty'],
-      order: { title: 'ASC' },
-    });
-  }
-
   async countByFaculty() {
     const rows = await this.subjectRepository
       .createQueryBuilder('subject')
@@ -61,20 +53,6 @@ export class SubjectBean {
       .groupBy('major.facultyId')
       .getRawMany<{ facultyId: number; count: string }>();
     return new Map(rows.map((row) => [row.facultyId, Number(row.count)]));
-  }
-
-  findByMajor(majorId: number) {
-    return this.subjectRepository.find({
-      where: { major: { id: majorId } },
-      order: { code: 'ASC', title: 'ASC' },
-    });
-  }
-
-  findWithoutMajor() {
-    return this.subjectRepository.find({
-      where: { major: IsNull() },
-      order: { title: 'ASC' },
-    });
   }
 
   async findById(id: number) {

@@ -11,7 +11,7 @@ import { FacultyBean } from 'src/domain/faculty/faculty.bean';
 import type { MajorForm } from 'src/domain/forms';
 import { MajorBean } from 'src/domain/major/major.bean';
 import { CmsAction, CmsController, CmsView } from '../cms.decorator';
-import { CmsPermission } from '../cms.permission';
+import { CmsPermission } from '../util/cms.permission';
 
 const LIST = '/cms/majors';
 

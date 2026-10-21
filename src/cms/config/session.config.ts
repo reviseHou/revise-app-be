@@ -12,7 +12,7 @@ declare module 'express-session' {
 }
 
 const SESSION_TABLE = 'cms_sessions';
-const SESSION_MAX_AGE = 8 * 60 * 60 * 1000;
+const SESSION_MAX_AGE = 15 * 60 * 1000;
 
 export function setupSession(app: NestExpressApplication) {
   const secret = process.env.SESSION_SECRET;
