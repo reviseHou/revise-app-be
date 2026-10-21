@@ -8,6 +8,7 @@ import { IsNull, Repository } from 'typeorm';
 import { ActiveStatus } from '../enums';
 import { CatalogForm, SubjectForm } from '../forms';
 import { MajorBean } from '../major/major.bean';
+import { PAGE_SIZE, likeOf, offsetOf } from '../paging';
 import { Subjects } from './entity/subject.entity';
 
 @Injectable()
@@ -22,11 +23,44 @@ export class SubjectBean {
     return this.subjectRepository.count();
   }
 
-  findAll() {
+  async search(keyword: string, facultyId: number | undefined, page: number) {
+    const query = this.subjectRepository
+      .createQueryBuilder('subject')
+      .leftJoinAndSelect('subject.major', 'major')
+      .leftJoinAndSelect('major.faculty', 'faculty')
+      .orderBy('subject.title', 'ASC')
+      .skip(offsetOf(page))
+      .take(PAGE_SIZE);
+    if (keyword) {
+      query.andWhere(
+        '(subject.title ILIKE :like OR subject.code ILIKE :like)',
+        {
+          like: likeOf(keyword),
+        },
+      );
+    }
+    if (facultyId) query.andWhere('faculty.id = :facultyId', { facultyId });
+    const [subjects, total] = await query.getManyAndCount();
+    return { subjects, total };
+  }
+
+  findAll(facultyId?: number) {
     return this.subjectRepository.find({
+      where: facultyId ? { major: { faculty: { id: facultyId } } } : {},
       relations: ['major', 'major.faculty'],
       order: { title: 'ASC' },
     });
+  }
+
+  async countByFaculty() {
+    const rows = await this.subjectRepository
+      .createQueryBuilder('subject')
+      .innerJoin('subject.major', 'major')
+      .select('major.facultyId', 'facultyId')
+      .addSelect('COUNT(subject.id)', 'count')
+      .groupBy('major.facultyId')
+      .getRawMany<{ facultyId: number; count: string }>();
+    return new Map(rows.map((row) => [row.facultyId, Number(row.count)]));
   }
 
   findByMajor(majorId: number) {
@@ -77,6 +111,21 @@ export class SubjectBean {
         ? ActiveStatus.INACTIVE
         : ActiveStatus.ACTIVE;
     return this.subjectRepository.save(subject);
+  }
+
+  async remove(id: number) {
+    const subject = await this.subjectRepository.findOne({
+      where: { id },
+      relations: ['documents'],
+    });
+    if (!subject) throw new NotFoundException('Không tìm thấy môn học');
+    if (subject.documents.length) {
+      throw new BadRequestException(
+        `Môn ${subject.title} còn ${subject.documents.length} tài liệu, không thể xóa. Hãy ẩn môn học thay vì xóa`,
+      );
+    }
+    await this.subjectRepository.remove(subject);
+    return subject;
   }
 
   private async readValidForm(form: CatalogForm, ownId?: number) {

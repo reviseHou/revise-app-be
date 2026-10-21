@@ -1,14 +1,15 @@
 {{#extend "title"}}Thống kê{{/extend}}
+<div class="hero"><h2>Xin chào, {{user.username}}</h2><p>Tổng quan và quản lý hệ thống Revise HOU.</p></div>
 <div class="row">
-    <div class="col-lg-3 col-6"><div class="small-box bg-info"><div class="inner"><h3>{{userCount}}</h3><p>Người dùng</p></div><div class="icon"><i class="fas fa-users"></i></div></div></div>
-    <div class="col-lg-3 col-6"><div class="small-box bg-success"><div class="inner"><h3>{{documentCount}}</h3><p>Tài liệu</p></div><div class="icon"><i class="fas fa-file-alt"></i></div></div></div>
-    <div class="col-lg-3 col-6"><div class="small-box bg-warning"><div class="inner"><h3>{{pendingDocumentCount}}</h3><p>Chờ duyệt</p></div><div class="icon"><i class="fas fa-hourglass-half"></i></div></div></div>
-    <div class="col-lg-3 col-6"><div class="small-box bg-danger"><div class="inner"><h3>{{overdueDocumentCount}}</h3><p>Chờ duyệt quá {{overdueDays}} ngày</p></div><div class="icon"><i class="fas fa-exclamation-circle"></i></div></div></div>
+    <div class="col-lg-3 col-6"><div class="stat-card"><span class="stat-icon"><i class="fas fa-users"></i></span><div><div class="stat-label">Người dùng</div><div class="stat-value">{{userCount}}</div></div></div></div>
+    <div class="col-lg-3 col-6"><div class="stat-card"><span class="stat-icon"><i class="fas fa-file-alt"></i></span><div><div class="stat-label">Tài liệu</div><div class="stat-value">{{documentCount}}</div></div></div></div>
+    <div class="col-lg-3 col-6"><div class="stat-card warn"><span class="stat-icon"><i class="fas fa-hourglass-half"></i></span><div><div class="stat-label">Chờ duyệt</div><div class="stat-value">{{pendingDocumentCount}}</div></div></div></div>
+    <div class="col-lg-3 col-6"><div class="stat-card danger"><span class="stat-icon"><i class="fas fa-exclamation-circle"></i></span><div><div class="stat-label">Chờ duyệt quá {{overdueDays}} ngày</div><div class="stat-value">{{overdueDocumentCount}}</div></div></div></div>
 </div>
 <div class="row">
-    <div class="col-md-4"><div class="info-box"><span class="info-box-icon bg-primary"><i class="fas fa-university"></i></span><div class="info-box-content"><span class="info-box-text">Khoa</span><span class="info-box-number">{{facultyCount}}</span></div></div></div>
-    <div class="col-md-4"><div class="info-box"><span class="info-box-icon bg-primary"><i class="fas fa-sitemap"></i></span><div class="info-box-content"><span class="info-box-text">Ngành</span><span class="info-box-number">{{majorCount}}</span></div></div></div>
-    <div class="col-md-4"><div class="info-box"><span class="info-box-icon bg-primary"><i class="fas fa-book"></i></span><div class="info-box-content"><span class="info-box-text">Môn học</span><span class="info-box-number">{{subjectCount}}</span></div></div></div>
+    <div class="col-md-4"><div class="stat-card"><span class="stat-icon"><i class="fas fa-university"></i></span><div><div class="stat-label">Khoa</div><div class="stat-value">{{facultyCount}}</div></div></div></div>
+    <div class="col-md-4"><div class="stat-card"><span class="stat-icon"><i class="fas fa-sitemap"></i></span><div><div class="stat-label">Ngành</div><div class="stat-value">{{majorCount}}</div></div></div></div>
+    <div class="col-md-4"><div class="stat-card"><span class="stat-icon"><i class="fas fa-book"></i></span><div><div class="stat-label">Môn học</div><div class="stat-value">{{subjectCount}}</div></div></div></div>
 </div>
 <div class="row">
     <div class="col-md-6">
@@ -16,16 +17,16 @@
             <div class="card-header"><h3 class="card-title">Tài liệu theo trạng thái</h3></div>
             <div class="card-body p-0"><table class="table table-sm">
                 <tr><td style="width:35%">{{> status_badge status='PENDING'}}</td>
-                    <td><div class="progress progress-xs"><div class="progress-bar bg-primary" style="width: {{percent documentCountByStatus.PENDING documentCount}}%"></div></div></td>
+                    <td><div class="progress progress-xs"><div class="progress-bar" style="width: {{percent documentCountByStatus.PENDING documentCount}}%"></div></div></td>
                     <td class="text-right"><b>{{documentCountByStatus.PENDING}}</b></td></tr>
                 <tr><td>{{> status_badge status='REJECTED'}}</td>
-                    <td><div class="progress progress-xs"><div class="progress-bar bg-primary" style="width: {{percent documentCountByStatus.REJECTED documentCount}}%"></div></div></td>
+                    <td><div class="progress progress-xs"><div class="progress-bar" style="width: {{percent documentCountByStatus.REJECTED documentCount}}%"></div></div></td>
                     <td class="text-right"><b>{{documentCountByStatus.REJECTED}}</b></td></tr>
                 <tr><td>{{> status_badge status='ACTIVE'}}</td>
-                    <td><div class="progress progress-xs"><div class="progress-bar bg-primary" style="width: {{percent documentCountByStatus.ACTIVE documentCount}}%"></div></div></td>
+                    <td><div class="progress progress-xs"><div class="progress-bar" style="width: {{percent documentCountByStatus.ACTIVE documentCount}}%"></div></div></td>
                     <td class="text-right"><b>{{documentCountByStatus.ACTIVE}}</b></td></tr>
                 <tr><td>{{> status_badge status='INACTIVE'}}</td>
-                    <td><div class="progress progress-xs"><div class="progress-bar bg-primary" style="width: {{percent documentCountByStatus.INACTIVE documentCount}}%"></div></div></td>
+                    <td><div class="progress progress-xs"><div class="progress-bar" style="width: {{percent documentCountByStatus.INACTIVE documentCount}}%"></div></div></td>
                     <td class="text-right"><b>{{documentCountByStatus.INACTIVE}}</b></td></tr>
             </table></div>
         </div>
@@ -36,7 +37,7 @@
             <div class="card-body p-0"><table class="table table-sm">
                 {{#each documentCountByFaculty}}
                 <tr><td style="width:40%">{{name}}</td>
-                    <td><div class="progress progress-xs"><div class="progress-bar bg-success" style="width: {{percent count ../documentCount}}%"></div></div></td>
+                    <td><div class="progress progress-xs"><div class="progress-bar" style="width: {{percent count ../documentCount}}%"></div></div></td>
                     <td class="text-right"><b>{{count}}</b></td></tr>
                 {{else}}<tr><td class="text-muted p-3">Chưa có dữ liệu</td></tr>{{/each}}
             </table></div>
@@ -50,7 +51,7 @@
             <div class="card-body p-0"><table class="table table-sm">
                 {{#each documentCountByMonth}}
                 <tr><td style="width:30%">{{name}}</td>
-                    <td><div class="progress progress-xs"><div class="progress-bar bg-info" style="width: {{percent count ../documentCount}}%"></div></div></td>
+                    <td><div class="progress progress-xs"><div class="progress-bar" style="width: {{percent count ../documentCount}}%"></div></div></td>
                     <td class="text-right"><b>{{count}}</b></td></tr>
                 {{else}}<tr><td class="text-muted p-3">Chưa có dữ liệu</td></tr>{{/each}}
             </table></div>
@@ -62,7 +63,7 @@
             <div class="card-body p-0"><table class="table table-sm">
                 {{#each topUploaders}}
                 <tr><td style="width:40%">{{name}}</td>
-                    <td><div class="progress progress-xs"><div class="progress-bar bg-warning" style="width: {{percent count ../documentCount}}%"></div></div></td>
+                    <td><div class="progress progress-xs"><div class="progress-bar" style="width: {{percent count ../documentCount}}%"></div></div></td>
                     <td class="text-right"><b>{{count}}</b></td></tr>
                 {{else}}<tr><td class="text-muted p-3">Chưa có tài liệu đang hiển thị</td></tr>{{/each}}
             </table></div>
@@ -72,7 +73,7 @@
             <div class="card-body p-0"><table class="table table-sm">
                 {{#each userCountByRole}}
                 <tr><td style="width:40%">{{roleName}}</td>
-                    <td><div class="progress progress-xs"><div class="progress-bar bg-secondary" style="width: {{percent count ../userCount}}%"></div></div></td>
+                    <td><div class="progress progress-xs"><div class="progress-bar" style="width: {{percent count ../userCount}}%"></div></div></td>
                     <td class="text-right"><b>{{count}}</b></td></tr>
                 {{else}}<tr><td class="text-muted p-3">Chưa có người dùng</td></tr>{{/each}}
             </table></div>

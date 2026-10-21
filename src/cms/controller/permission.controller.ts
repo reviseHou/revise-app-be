@@ -1,4 +1,11 @@
-import { Body, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Get,
+  Post,
+  ParseIntPipe,
+  Query,
+  DefaultValuePipe,
+} from '@nestjs/common';
 import type { PermissionForm } from 'src/domain/forms';
 import { PermissionBean } from 'src/domain/permission/permission.bean';
 import { CmsAction, CmsController, CmsView } from '../cms.decorator';
@@ -12,8 +19,17 @@ export class PermissionController {
 
   @Get()
   @CmsView(CmsPermission.READ_PERMISSION, 'permission/list')
-  async showPermissionList() {
-    return { permissions: await this.permissionBean.findAll() };
+  async showPermissionList(
+    @Query('keyword') keywordParam: string | undefined,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) pageParam: number,
+  ) {
+    const keyword = (keywordParam ?? '').trim();
+    const page = Math.max(1, pageParam);
+    const { permissions, total } = await this.permissionBean.search(
+      keyword,
+      page,
+    );
+    return { permissions, total, keyword, page };
   }
 
   @Get('create')

@@ -1,4 +1,12 @@
-import { Body, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+  DefaultValuePipe,
+} from '@nestjs/common';
 import { FacultyBean } from 'src/domain/faculty/faculty.bean';
 import type { MajorForm } from 'src/domain/forms';
 import { MajorBean } from 'src/domain/major/major.bean';
@@ -16,8 +24,14 @@ export class MajorController {
 
   @Get()
   @CmsView(CmsPermission.READ_MAJOR, 'major/list')
-  async showMajorList() {
-    return { majors: await this.majorBean.findAll() };
+  async showMajorList(
+    @Query('keyword') keywordParam: string | undefined,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) pageParam: number,
+  ) {
+    const keyword = (keywordParam ?? '').trim();
+    const page = Math.max(1, pageParam);
+    const { majors, total } = await this.majorBean.search(keyword, page);
+    return { majors, total, keyword, page };
   }
 
   @Get('create')

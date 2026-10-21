@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RoleForm } from '../forms';
 import { PermissionBean } from '../permission/permission.bean';
+import { PAGE_SIZE, likeOf, offsetOf } from '../paging';
 import { Roles } from './entity/role.entity';
 
 @Injectable()
@@ -19,6 +20,20 @@ export class RoleBean {
 
   findAll() {
     return this.roleRepository.find({ order: { id: 'ASC' } });
+  }
+
+  async search(keyword: string, page: number) {
+    const query = this.roleRepository
+      .createQueryBuilder('role')
+      .leftJoinAndSelect('role.permissions', 'permission')
+      .orderBy('role.id', 'ASC')
+      .skip(offsetOf(page))
+      .take(PAGE_SIZE);
+    if (keyword) {
+      query.where('role.name ILIKE :like', { like: likeOf(keyword) });
+    }
+    const [roles, total] = await query.getManyAndCount();
+    return { roles, total };
   }
 
   findAllWithPermissions() {

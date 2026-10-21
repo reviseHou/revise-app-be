@@ -5,6 +5,8 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import type { RoleForm } from 'src/domain/forms';
 import { PermissionBean } from 'src/domain/permission/permission.bean';
@@ -25,9 +27,18 @@ export class RoleController {
 
   @Get()
   @CmsView(CmsPermission.READ_ROLE, 'role/list')
-  async showRoleList() {
+  async showRoleList(
+    @Query('keyword') keywordParam: string | undefined,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) pageParam: number,
+  ) {
+    const keyword = (keywordParam ?? '').trim();
+    const page = Math.max(1, pageParam);
+    const { roles, total } = await this.roleBean.search(keyword, page);
     return {
-      roles: await this.roleBean.findAllWithPermissions(),
+      roles,
+      total,
+      keyword,
+      page,
       permissions: await this.permissionBean.findAll(),
       userCountByRole: await this.userBean.countByRole(),
     };

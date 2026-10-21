@@ -1,4 +1,12 @@
-import { Body, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+  DefaultValuePipe,
+} from '@nestjs/common';
 import { FacultyBean } from 'src/domain/faculty/faculty.bean';
 import type { CatalogForm } from 'src/domain/forms';
 import { CmsAction, CmsController, CmsView } from '../cms.decorator';
@@ -12,8 +20,14 @@ export class FacultyController {
 
   @Get()
   @CmsView(CmsPermission.READ_FACULTY, 'faculty/list')
-  async showFacultyList() {
-    return { faculties: await this.facultyBean.findAllWithMajorCount() };
+  async showFacultyList(
+    @Query('keyword') keywordParam: string | undefined,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) pageParam: number,
+  ) {
+    const keyword = (keywordParam ?? '').trim();
+    const page = Math.max(1, pageParam);
+    const { faculties, total } = await this.facultyBean.search(keyword, page);
+    return { faculties, total, keyword, page };
   }
 
   @Get('create')

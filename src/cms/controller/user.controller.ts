@@ -1,11 +1,11 @@
 import {
   Body,
-  DefaultValuePipe,
   Get,
   Param,
   ParseIntPipe,
   Post,
   Query,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import type { AssignRoleForm } from 'src/domain/forms';
 import { RoleBean } from 'src/domain/role/role.bean';
@@ -26,12 +26,18 @@ export class UserController {
   @CmsView(CmsPermission.READ_USER, 'user/list')
   async showUserList(
     @Query('keyword') keywordParam: string | undefined,
+    @Query('roleId') roleIdParam: string | undefined,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) pageParam: number,
   ) {
     const keyword = (keywordParam ?? '').trim();
     const page = Math.max(1, pageParam);
-    const { users, total } = await this.userBean.search(keyword, page);
-    return { users, total, keyword, page };
+    const roleId = Number(roleIdParam) || undefined;
+    const [{ users, total }, roleCounts, userCount] = await Promise.all([
+      this.userBean.search(keyword, page, roleId),
+      this.userBean.countByRole(),
+      this.userBean.count(),
+    ]);
+    return { users, total, keyword, page, roleCounts, userCount, roleId };
   }
 
   @Get(':id/edit')

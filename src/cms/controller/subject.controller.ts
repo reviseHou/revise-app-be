@@ -1,4 +1,13 @@
-import { Body, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+  DefaultValuePipe,
+} from '@nestjs/common';
+import { FacultyBean } from 'src/domain/faculty/faculty.bean';
 import type { SubjectForm } from 'src/domain/forms';
 import { MajorBean } from 'src/domain/major/major.bean';
 import { SubjectBean } from 'src/domain/subject/subject.bean';
@@ -12,12 +21,35 @@ export class SubjectController {
   constructor(
     private readonly subjectBean: SubjectBean,
     private readonly majorBean: MajorBean,
+    private readonly facultyBean: FacultyBean,
   ) {}
 
   @Get()
   @CmsView(CmsPermission.READ_SUBJECT, 'subject/list')
-  async showSubjectList() {
-    return { subjects: await this.subjectBean.findAll() };
+  async showSubjectList(
+    @Query('keyword') keywordParam: string | undefined,
+    @Query('facultyId') facultyIdParam: string | undefined,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) pageParam: number,
+  ) {
+    const keyword = (keywordParam ?? '').trim();
+    const page = Math.max(1, pageParam);
+    const facultyId = Number(facultyIdParam) || undefined;
+    const [{ subjects, total }, faculties, countByFaculty] = await Promise.all([
+      this.subjectBean.search(keyword, facultyId, page),
+      this.facultyBean.findAllWithMajorCount(),
+      this.subjectBean.countByFaculty(),
+    ]);
+    return {
+      subjects,
+      total,
+      keyword,
+      page,
+      facultyId,
+      faculties: faculties.map((faculty) => ({
+        ...faculty,
+        subjectCount: countByFaculty.get(faculty.id) ?? 0,
+      })),
+    };
   }
 
   @Get('create')
@@ -56,6 +88,13 @@ export class SubjectController {
   ) {
     const subject = await this.subjectBean.update(id, form);
     return `Đã cập nhật môn ${subject.title}`;
+  }
+
+  @Post(':id/delete')
+  @CmsAction(CmsPermission.UPDATE_SUBJECT, { to: LIST, onError: LIST })
+  async deleteSubject(@Param('id', ParseIntPipe) id: number) {
+    const subject = await this.subjectBean.remove(id);
+    return `Đã xóa môn ${subject.title}`;
   }
 
   @Post(':id/toggle-status')

@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ActiveStatus } from '../enums';
 import { CatalogForm } from '../forms';
+import { PAGE_SIZE, likeOf, offsetOf } from '../paging';
 import { Faculties } from './entity/faculty.entity';
 
 @Injectable()
@@ -18,6 +19,22 @@ export class FacultyBean {
 
   count() {
     return this.facultyRepository.count();
+  }
+
+  async search(keyword: string, page: number) {
+    const query = this.facultyRepository
+      .createQueryBuilder('faculty')
+      .loadRelationCountAndMap('faculty.majorCount', 'faculty.majors')
+      .orderBy('faculty.code', 'ASC')
+      .skip(offsetOf(page))
+      .take(PAGE_SIZE);
+    if (keyword) {
+      query.where('(faculty.code ILIKE :like OR faculty.name ILIKE :like)', {
+        like: likeOf(keyword),
+      });
+    }
+    const [faculties, total] = await query.getManyAndCount();
+    return { faculties, total };
   }
 
   async findAllWithMajorCount() {

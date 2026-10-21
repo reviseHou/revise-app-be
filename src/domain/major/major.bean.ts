@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { ActiveStatus } from '../enums';
 import { FacultyBean } from '../faculty/faculty.bean';
 import { CatalogForm, MajorForm } from '../forms';
+import { PAGE_SIZE, likeOf, offsetOf } from '../paging';
 import { Majors } from './entity/major.entity';
 
 @Injectable()
@@ -20,6 +21,22 @@ export class MajorBean {
 
   count() {
     return this.majorRepository.count();
+  }
+
+  async search(keyword: string, page: number) {
+    const query = this.majorRepository
+      .createQueryBuilder('major')
+      .leftJoinAndSelect('major.faculty', 'faculty')
+      .orderBy('major.code', 'ASC')
+      .skip(offsetOf(page))
+      .take(PAGE_SIZE);
+    if (keyword) {
+      query.where('(major.code ILIKE :like OR major.name ILIKE :like)', {
+        like: likeOf(keyword),
+      });
+    }
+    const [majors, total] = await query.getManyAndCount();
+    return { majors, total };
   }
 
   findAll() {

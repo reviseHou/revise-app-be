@@ -1,12 +1,12 @@
 import {
   Body,
-  DefaultValuePipe,
   Get,
   Param,
   ParseIntPipe,
   Post,
   Query,
   Req,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { DocumentBean } from 'src/domain/document/document.bean';
 import { REVIEW_CRITERIA } from 'src/domain/document/document.criteria';
@@ -18,6 +18,8 @@ import type { CmsRequest } from '../util/cms.helper';
 
 const DETAIL = '/cms/documents/:id';
 
+const ALL_STATUS = 'ALL';
+
 @CmsController('cms/documents')
 export class DocumentController {
   constructor(private readonly documentBean: DocumentBean) {}
@@ -25,23 +27,31 @@ export class DocumentController {
   @Get()
   @CmsView(CmsPermission.READ_DOCUMENT, 'document/list')
   async showDocumentList(
+    @Query('keyword') keywordParam: string | undefined,
     @Query('status') statusParam: string | undefined,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) pageParam: number,
   ) {
-    const status =
-      Object.values(DocumentStatus).find((s) => s === statusParam) ??
-      DocumentStatus.PENDING;
+    const keyword = (keywordParam ?? '').trim();
     const page = Math.max(1, pageParam);
-    const { documents, total } = await this.documentBean.findByStatus(
+    const status =
+      statusParam === ALL_STATUS
+        ? undefined
+        : (Object.values(DocumentStatus).find((s) => s === statusParam) ??
+          DocumentStatus.PENDING);
+    const { documents, total } = await this.documentBean.search(
+      keyword,
       status,
       page,
     );
+    const countByStatus = await this.documentBean.countByStatus();
     return {
-      status,
+      status: status ?? ALL_STATUS,
+      keyword,
       documents,
       total,
       page,
-      countByStatus: await this.documentBean.countByStatus(),
+      countByStatus,
+      countAll: Object.values(countByStatus).reduce((a, b) => a + b, 0),
     };
   }
 

@@ -3,22 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Đăng nhập · ReviseHOU CMS</title>
+    <title>Đăng nhập · Revise HOU CMS</title>
     <link rel="stylesheet" href="/cms/resources/adminlte/css/adminlte.min.css">
     <link rel="stylesheet" href="/cms/resources/plugin/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="/cms/resources/css/cms.css">
 </head>
 <body class="hold-transition login-page">
-<div class="login-box">
-    <div class="login-logo"><b>Revise</b>HOU CMS</div>
-    <div class="card">
-        <div class="card-body login-card-body">
-            {{> alert}}
-            <p class="login-box-msg">Đăng nhập để quản trị hệ thống</p>
-            <div class="social-auth-links text-center">
-                <a href="/api/auth/google?from=cms" class="btn btn-block btn-danger"><i class="fab fa-google mr-2"></i> Đăng nhập bằng tài khoản HOU (Google)</a>
+<div class="login-wrap">
+    <div class="login-panel">
+        <div class="brand"><i class="fas fa-graduation-cap mr-2"></i>Revise HOU</div>
+        <div class="card">
+            <div class="card-body">
+                {{> alert}}
+                <h1>Chào mừng bạn đến với Revise HOU</h1>
+                <p class="text-center text-muted small">Đăng nhập để quản trị hệ thống</p>
+                <a href="/api/auth/google?from=cms" class="btn btn-block btn-google"><i class="fab fa-google mr-2"></i> Đăng nhập với HOU gmail</a>
+                <p class="text-center text-muted small mt-4 mb-0">Bằng cách tiếp tục, bạn đồng ý với Điều khoản dịch vụ và Chính sách bảo mật</p>
             </div>
         </div>
+    </div>
+    <div class="login-hero">
+        <h2>Học lại,<br>nhớ <em>mãi mãi</em></h2>
+        <p class="text-muted">Hệ thống ôn tập thông minh dành cho sinh viên Đại học Mở Hà Nội – giúp bạn ghi nhớ kiến thức bền vững, đơn giản và hiệu quả.</p>
+        <ul>
+            <li><i class="far fa-check-circle"></i>Lặp lại cách quãng dựa trên trí nhớ của bạn</li>
+            <li><i class="far fa-check-circle"></i>Flashcard thông minh tự thích nghi</li>
+            <li><i class="far fa-check-circle"></i>Theo dõi tiến độ học tập mỗi ngày</li>
+        </ul>
+        <span class="tag">Dành cho sinh viên Trường Đại học Mở Hà Nội</span>
     </div>
 </div>
 </body>

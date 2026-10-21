@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PAGE_SIZE } from '../paging';
 import { AssignRoleForm } from '../forms';
 import { RoleBean } from '../role/role.bean';
+import { PAGE_SIZE, likeOf, offsetOf } from '../paging';
 import { Users } from './entity/user.entity';
 
 export interface UserCountOfRole {
@@ -42,19 +42,19 @@ export class UserBean {
     return rows.map((row) => ({ ...row, count: Number(row.count) }));
   }
 
-  async search(keyword: string, page: number) {
+  async search(keyword: string, page: number, roleId?: number) {
     const query = this.userRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.role', 'role')
       .orderBy('user.id', 'DESC')
-      .skip((page - 1) * PAGE_SIZE)
+      .skip(offsetOf(page))
       .take(PAGE_SIZE);
     if (keyword) {
-      query.where(
-        '(user.username ILIKE :keyword OR user.email ILIKE :keyword)',
-        { keyword: `%${keyword}%` },
-      );
+      query.where('(user.username ILIKE :like OR user.email ILIKE :like)', {
+        like: likeOf(keyword),
+      });
     }
+    if (roleId) query.andWhere('role.id = :roleId', { roleId });
     const [users, total] = await query.getManyAndCount();
     return { users, total };
   }

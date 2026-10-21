@@ -6,10 +6,10 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DocumentStatus } from '../enums';
-import { PAGE_SIZE } from '../paging';
 import { REVIEW_CRITERIA } from './document.criteria';
 import { RejectDocumentForm } from '../forms';
 import { Users } from '../user/entity/user.entity';
+import { PAGE_SIZE, likeOf, offsetOf } from '../paging';
 import { Documents } from './entity/document.entity';
 
 export interface NameCount {
@@ -98,19 +98,26 @@ export class DocumentBean {
     return toNameCounts(rows);
   }
 
-  async findByStatus(status: DocumentStatus, page: number) {
+  async search(
+    keyword: string,
+    status: DocumentStatus | undefined,
+    page: number,
+  ) {
     const oldestFirst = status === DocumentStatus.PENDING;
-    const [documents, total] = await this.documentRepository
+    const query = this.documentRepository
       .createQueryBuilder('document')
       .leftJoinAndSelect('document.author', 'author')
       .leftJoinAndSelect('document.subject', 'subject')
       .leftJoinAndSelect('subject.major', 'major')
       .leftJoinAndSelect('major.faculty', 'faculty')
-      .where('document.status = :status', { status })
       .orderBy('document.createdAt', oldestFirst ? 'ASC' : 'DESC')
-      .skip((page - 1) * PAGE_SIZE)
-      .take(PAGE_SIZE)
-      .getManyAndCount();
+      .skip(offsetOf(page))
+      .take(PAGE_SIZE);
+    if (status) query.andWhere('document.status = :status', { status });
+    if (keyword) {
+      query.andWhere('document.title ILIKE :like', { like: likeOf(keyword) });
+    }
+    const [documents, total] = await query.getManyAndCount();
     return { documents, total };
   }
 

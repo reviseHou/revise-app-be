@@ -1,25 +1,26 @@
 {{#extend "title"}}Khoa{{/extend}}
-<div class="card">
-    <div class="card-header">
-        <a href="/cms/faculties/create" class="btn btn-primary"><i class="fas fa-plus"></i> Tạo mới</a>
-    </div>
-    <div class="card-body">
-        <table class="table table-bordered table-hover js-datatable">
-            <thead><tr><th>Mã</th><th>Khoa</th><th>Số ngành</th><th>Trạng thái</th><th style="width:170px">Thao tác</th></tr></thead>
+<form method="get" action="/cms/faculties" class="toolbar">
+    <div class="search-box"><input type="search" name="keyword" value="{{keyword}}" placeholder="Tìm theo mã hoặc tên khoa"><button type="submit" class="search-btn"><i class="fas fa-search"></i></button></div>
+    <a href="/cms/faculties/create" class="btn btn-primary"><i class="fas fa-plus"></i> Tạo mới</a>
+</form>
+<div class="table-wrap">
+        <table class="table table-bordered table-hover">
+            <thead><tr><th style="width:60px">STT</th><th>Mã</th><th>Khoa</th><th>Số ngành</th><th>Trạng thái</th><th style="width:170px">Thao tác</th></tr></thead>
             <tbody>
             {{#each faculties}}
             <tr>
+                <td>{{add (multiply (add @root.page -1) @root.pageSize) (add @index 1)}}</td>
                 <td>{{code}}</td>
                 <td>{{name}}<div class="text-muted small">{{description}}</div></td>
                 <td>{{majorCount}}</td>
                 <td>{{> status_badge status=status}}</td>
-                <td>
-                    <a href="/cms/faculties/{{id}}/edit" class="btn btn-sm btn-warning">Sửa</a>
-                    <form method="post" action="/cms/faculties/{{id}}/toggle-status" class="d-inline"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}"><button type="submit" class="btn btn-sm btn-default">{{#if (eq status 'ACTIVE')}}Ẩn{{else}}Hiện{{/if}}</button></form>
+                <td class="action-cell">
+                    <a href="/cms/faculties/{{id}}/edit" class="btn-icon" title="Chỉnh sửa"><i class="fas fa-pen"></i></a>
+                    <form method="post" action="/cms/faculties/{{id}}/toggle-status" class="d-inline"><input type="hidden" name="_csrf" value="{{@root.csrfToken}}"><button type="submit" class="btn-icon" title="{{#if (eq status 'ACTIVE')}}Ẩn{{else}}Hiện{{/if}}"><i class="fas {{#if (eq status 'ACTIVE')}}fa-eye-slash{{else}}fa-eye{{/if}}"></i></button></form>
                 </td>
             </tr>
             {{/each}}
             </tbody>
         </table>
-    </div>
 </div>
+{{> paging}}
