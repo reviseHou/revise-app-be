@@ -8,6 +8,7 @@ import { HomeController } from './controller/home.controller';
 import { LoginController } from './controller/login.controller';
 import { MajorController } from './controller/major.controller';
 import { PermissionController } from './controller/permission.controller';
+import { QuizController } from './controller/quiz.controller';
 import { RoleController } from './controller/role.controller';
 import { SubjectController } from './controller/subject.controller';
 import { UserController } from './controller/user.controller';
@@ -21,6 +22,7 @@ import { UserController } from './controller/user.controller';
     MajorController,
     SubjectController,
     DocumentController,
+    QuizController,
     UserController,
     RoleController,
     PermissionController,

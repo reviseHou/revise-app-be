@@ -1,0 +1,32 @@
+{{#extend "title"}}Duyệt bài kiểm tra{{/extend}}
+{{#extend "subtitle"}}Xem xét và duyệt bài kiểm tra do người dùng tạo.{{/extend}}
+<form method="get" action="/cms/quizzes" class="toolbar">
+    <input type="hidden" name="status" value="{{status}}">
+    <a href="/cms/quizzes?status=ALL" class="chip {{#if (eq status 'ALL')}}active{{/if}}">Tất cả ({{countAll}})</a>
+    <a href="/cms/quizzes?status=PENDING" class="chip {{#if (eq status 'PENDING')}}active{{/if}}">Chờ duyệt ({{countByStatus.PENDING}})</a>
+    <a href="/cms/quizzes?status=REJECTED" class="chip {{#if (eq status 'REJECTED')}}active{{/if}}">Bị từ chối ({{countByStatus.REJECTED}})</a>
+    <a href="/cms/quizzes?status=ACTIVE" class="chip {{#if (eq status 'ACTIVE')}}active{{/if}}">Đang hiển thị ({{countByStatus.ACTIVE}})</a>
+    <a href="/cms/quizzes?status=INACTIVE" class="chip {{#if (eq status 'INACTIVE')}}active{{/if}}">Đã ẩn ({{countByStatus.INACTIVE}})</a>
+    <div class="search-box"><input type="search" name="keyword" value="{{keyword}}" placeholder="Tìm theo tên bài kiểm tra"><button type="submit" class="search-btn"><i class="fas fa-search"></i></button></div>
+</form>
+<div class="table-wrap">
+    <table class="table table-bordered table-hover mb-0">
+        <thead><tr><th style="width:60px">STT</th><th>Bài kiểm tra</th><th>Khoa › Ngành › Môn</th><th>Số câu</th><th>Người tạo</th><th>Cập nhật</th><th>Trạng thái</th></tr></thead>
+        <tbody>
+        {{#each quizzes}}
+        <tr>
+            <td>{{add (multiply (add @root.page -1) @root.pageSize) (add @index 1)}}</td>
+            <td><a href="/cms/quizzes/{{id}}">{{title}}</a><div class="text-muted small">{{durationMinutes}} phút</div></td>
+            <td>{{#if subject.major}}{{subject.major.faculty.code}} › {{subject.major.code}} › {{/if}}{{subject.title}}</td>
+            <td>{{questionCount}}</td>
+            <td>{{#if createdBy}}{{createdBy.username}}<div class="text-muted small">{{createdBy.email}}</div>{{else}}<span class="text-muted">(hệ thống)</span>{{/if}}</td>
+            <td>{{moment updateAt "DD/MM/YYYY HH:mm"}}</td>
+            <td>{{> status_badge status=status}}</td>
+        </tr>
+        {{else}}
+        <tr><td colspan="7" class="text-muted p-3">Không có bài kiểm tra nào</td></tr>
+        {{/each}}
+        </tbody>
+    </table>
+</div>
+{{> paging}}

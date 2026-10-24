@@ -7,6 +7,9 @@ import { Faculties } from './faculty/entity/faculty.entity';
 import { MajorBean } from './major/major.bean';
 import { Majors } from './major/entity/major.entity';
 import { PermissionBean } from './permission/permission.bean';
+import { QuizBean } from './quiz/quiz.bean';
+import { Questions } from './quiz/entity/question.entity';
+import { Quizzes } from './quiz/entity/quiz.entity';
 import { Permissions } from './permission/entity/permission.entity';
 import { RoleBean } from './role/role.bean';
 import { Roles } from './role/entity/role.entity';
@@ -20,6 +23,7 @@ const beans = [
   MajorBean,
   SubjectBean,
   DocumentBean,
+  QuizBean,
   UserBean,
   RoleBean,
   PermissionBean,
@@ -32,6 +36,8 @@ const beans = [
       Roles,
       Permissions,
       Documents,
+      Quizzes,
+      Questions,
       Subjects,
       Faculties,
       Majors,

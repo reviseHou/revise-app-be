@@ -1,11 +1,15 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../user/users.service';
+import { Users } from '../user/entity/user.entity';
 import { RefreshTokenDto } from './dto/auth.dto';
+import { UserJwtPayload } from './auth.type';
+
+const REFRESH_TOKEN_EXPIRES_IN = '12h';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(UsersService.name);
+  private readonly logger = new Logger(AuthService.name);
 
   constructor(
     private readonly usersService: UsersService,
@@ -24,55 +28,38 @@ export class AuthService {
         email: googleUser.email,
         username: googleUser.username,
         avatarUrl: googleUser.avatarUrl,
-        roleId: 2,
+        roleId: Number(process.env.WEB_USER_ROLE_ID),
         createdAt: new Date(),
         updateAt: new Date(),
       });
     }
 
-    const permissions = user.role?.permissions?.map((p) => p.name) || [];
+    return this.issueTokens(user);
+  }
 
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role?.name,
-      permissions,
-    };
+  async refreshToken(dto: RefreshTokenDto) {
+    try {
+      const decoded = this.jwtService.verify<UserJwtPayload>(dto.refreshToken, {
+        secret: process.env.REFRESH_TOKEN_SECRET,
+      });
+      const user = await this.usersService.findUserById(decoded.sub);
+      return this.issueTokens(user);
+    } catch (error) {
+      this.logger.error('Failed to refresh token', error.stack);
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
+
+  private issueTokens(user: Users) {
+    const payload: UserJwtPayload = { sub: user.id, email: user.email };
 
     return {
       accessToken: this.jwtService.sign(payload),
       refreshToken: this.jwtService.sign(payload, {
         secret: process.env.REFRESH_TOKEN_SECRET,
-        expiresIn: '7d',
+        expiresIn: REFRESH_TOKEN_EXPIRES_IN,
       }),
       user,
     };
-  }
-
-  async refreshToken(dto: RefreshTokenDto) {
-    try {
-      const decoded = this.jwtService.verify(dto.refreshToken, {
-        secret: process.env.REFRESH_TOKEN_SECRET,
-      });
-      const user = await this.usersService.findUserById(decoded.sub);
-      const permissions = user.role?.permissions?.map((p) => p.name) || [];
-      const payload = {
-        email: user.email,
-        sub: user.id,
-        role: user.role,
-        permissions,
-      };
-      return {
-        accessToken: this.jwtService.sign(payload),
-        refreshToken: this.jwtService.sign(payload, {
-          secret: process.env.REFRESH_TOKEN_SECRET,
-          expiresIn: '7d',
-        }),
-        user,
-      };
-    } catch (error) {
-      this.logger.error('Failed to refresh token', error.stack);
-      throw new UnauthorizedException('Invalid refresh token');
-    }
   }
 }

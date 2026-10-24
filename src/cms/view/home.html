@@ -1,12 +1,6 @@
 {{#extend "title"}}Thống kê{{/extend}}
 <div class="hero"><h2>Xin chào, {{user.username}}</h2><p>Tổng quan và quản lý hệ thống Revise HOU.</p></div>
 <div class="row">
-    <div class="col-lg-3 col-6"><div class="stat-card"><span class="stat-icon"><i class="fas fa-users"></i></span><div><div class="stat-label">Người dùng</div><div class="stat-value">{{userCount}}</div></div></div></div>
-    <div class="col-lg-3 col-6"><div class="stat-card"><span class="stat-icon"><i class="fas fa-file-alt"></i></span><div><div class="stat-label">Tài liệu</div><div class="stat-value">{{documentCount}}</div></div></div></div>
-    <div class="col-lg-3 col-6"><div class="stat-card warn"><span class="stat-icon"><i class="fas fa-hourglass-half"></i></span><div><div class="stat-label">Chờ duyệt</div><div class="stat-value">{{pendingDocumentCount}}</div></div></div></div>
-    <div class="col-lg-3 col-6"><div class="stat-card danger"><span class="stat-icon"><i class="fas fa-exclamation-circle"></i></span><div><div class="stat-label">Chờ duyệt quá {{overdueDays}} ngày</div><div class="stat-value">{{overdueDocumentCount}}</div></div></div></div>
-</div>
-<div class="row">
     <div class="col-md-5">
         <div class="card">
             <div class="card-header"><h3 class="card-title">Tài liệu theo trạng thái</h3></div>

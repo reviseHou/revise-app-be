@@ -20,7 +20,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   }
 
   async validate(accessToken: string, refreshToken: string, profile: any) {
-    console.log('Google profile:', profile);
     const email = profile?.emails?.[0]?.value;
     const avatarUrl = profile?.photos?.[0]?.value || profile?.picture || '';
     const username = profile?.displayName || profile?.name?.givenName || email;

@@ -29,18 +29,6 @@ export class DocumentBean {
     private readonly documentRepository: Repository<Documents>,
   ) {}
 
-  count() {
-    return this.documentRepository.count();
-  }
-
-  countPendingBefore(date: Date) {
-    return this.documentRepository
-      .createQueryBuilder('document')
-      .where('document.status = :status', { status: DocumentStatus.PENDING })
-      .andWhere('document.createdAt < :date', { date })
-      .getCount();
-  }
-
   async countByStatus() {
     const rows = await this.documentRepository
       .createQueryBuilder('document')

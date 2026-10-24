@@ -14,7 +14,10 @@ export class SubjectjsService {
 
   async findAll() {
     try {
-      const subjects = await this.subjectsRepository.find();
+      const subjects = await this.subjectsRepository.find({
+        relations: { major: { faculty: true } },
+        order: { title: 'ASC' },
+      });
       this.logger.log(`Found ${subjects.length} subjects`);
       return subjects;
     } catch (error) {

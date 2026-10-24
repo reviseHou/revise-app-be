@@ -10,6 +10,9 @@ import { SubjectsModule } from './domain/subject/subjects.module';
 import { DocumentsModule } from './domain/document/document.module';
 import { UploadModule } from './domain/upload/upload.module';
 import { CmsModule } from './cms/cms.module';
+import { QuizModule } from './domain/quiz/quiz.module';
+import { CommentModule } from './domain/comment/comment.module';
+import { SavedModule } from './domain/saved/saved.module';
 
 @Module({
   imports: [
@@ -35,6 +38,9 @@ import { CmsModule } from './cms/cms.module';
     SubjectsModule,
     DocumentsModule,
     UploadModule,
+    QuizModule,
+    CommentModule,
+    SavedModule,
     CmsModule,
   ],
 })

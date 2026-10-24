@@ -1,0 +1,95 @@
+{{#extend "title"}}{{quiz.title}}{{/extend}}
+{{#extend "breadcrumb"}}<li class="breadcrumb-item"><a href="/cms/quizzes">Duyệt bài kiểm tra</a></li>{{/extend}}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card card-outline card-primary">
+            <div class="card-header">
+                <h3 class="card-title">{{quiz.title}}</h3>
+                <div class="card-tools">{{> status_badge status=quiz.status}}</div>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Môn học</dt>
+                    <dd class="col-sm-9">{{#if quiz.subject.major}}{{quiz.subject.major.faculty.code}} › {{quiz.subject.major.code}} › {{/if}}{{quiz.subject.title}}</dd>
+                    <dt class="col-sm-3">Người tạo</dt>
+                    <dd class="col-sm-9">{{#if quiz.createdBy}}{{quiz.createdBy.username}} <span class="text-muted">({{quiz.createdBy.email}})</span>{{else}}<span class="text-muted">(hệ thống)</span>{{/if}}</dd>
+                    <dt class="col-sm-3">Thời gian làm bài</dt>
+                    <dd class="col-sm-9">{{quiz.durationMinutes}} phút · {{questions.length}} câu</dd>
+                    <dt class="col-sm-3">Mô tả</dt>
+                    <dd class="col-sm-9">{{#if quiz.description}}{{quiz.description}}{{else}}<span class="text-muted">(trống)</span>{{/if}}</dd>
+                    {{#if quiz.rejectReason}}
+                    <dt class="col-sm-3">Lý do từ chối</dt>
+                    <dd class="col-sm-9 text-danger">{{quiz.rejectReason}}</dd>
+                    {{/if}}
+                    {{#if quiz.reviewedBy}}
+                    <dt class="col-sm-3">Xử lý gần nhất</dt>
+                    <dd class="col-sm-9">{{quiz.reviewedBy.username}} lúc {{moment quiz.dateReviewed "DD/MM/YYYY HH:mm:ss"}}</dd>
+                    {{/if}}
+                </dl>
+            </div>
+        </div>
+
+        {{#each questions}}
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><b>Câu {{number}}.</b> {{title}}</h3></div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    {{#each answers}}
+                    <li class="mb-1 {{#if isCorrect}}text-success font-weight-bold{{/if}}">
+                        {{#if isCorrect}}<i class="fas fa-check-circle"></i>{{else}}<i class="far fa-circle text-muted"></i>{{/if}}
+                        {{letter}}. {{title}}
+                    </li>
+                    {{/each}}
+                </ul>
+                {{#if explanation}}<p class="text-muted small mt-2 mb-0"><i class="fas fa-info-circle"></i> {{explanation}}</p>{{/if}}
+            </div>
+        </div>
+        {{else}}
+        <div class="callout callout-warning">Bài kiểm tra chưa có câu hỏi.</div>
+        {{/each}}
+    </div>
+
+    <div class="col-lg-4">
+        {{#if (eq quiz.createdBy.id user.id)}}
+        <div class="callout callout-warning">Đây là bài kiểm tra do chính bạn tạo nên bạn không thể duyệt.</div>
+        {{else}}
+            {{#if (eq quiz.status 'PENDING')}}
+            <div class="card card-success card-outline">
+                <div class="card-header"><h3 class="card-title">Duyệt</h3></div>
+                <div class="card-body">
+                    <button type="button" class="btn btn-success btn-block" data-delete-action="/cms/quizzes/{{quiz.id}}/approve" data-confirm-title="Bạn có chắc chắn muốn duyệt bài kiểm tra này không?" data-delete-name="{{quiz.title}}"><i class="fas fa-check"></i> Duyệt bài kiểm tra</button>
+                </div>
+            </div>
+            <div class="card card-danger card-outline">
+                <div class="card-header"><h3 class="card-title">Từ chối</h3></div>
+                <form method="post" action="/cms/quizzes/{{quiz.id}}/reject">
+                    <div class="card-body">
+                        <p class="text-muted mb-2">Chọn tiêu chí vi phạm và ghi chú (bắt buộc).</p>
+                        {{#each criteria}}
+                        <div class="custom-control custom-checkbox">
+                            <input class="custom-control-input" type="checkbox" id="criteria{{code}}" name="criteria[]" value="{{code}}">
+                            <label for="criteria{{code}}" class="custom-control-label"><b>{{code}}</b> {{name}}</label>
+                        </div>
+                        {{/each}}
+                        <div class="form-group mt-3">
+                            <label for="note">Ghi chú</label>
+                            <textarea class="form-control" id="note" name="note" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="card-footer"><button type="submit" class="btn btn-danger btn-block"><i class="fas fa-times"></i> Từ chối</button></div>
+                </form>
+            </div>
+            {{/if}}
+            {{#if (eq quiz.status 'ACTIVE')}}
+            <div class="card"><div class="card-body">
+                <button type="button" class="btn btn-default btn-block" data-delete-action="/cms/quizzes/{{quiz.id}}/hide" data-confirm-title="Bạn có chắc chắn muốn ẩn bài kiểm tra này không?" data-delete-name="{{quiz.title}}"><i class="fas fa-eye-slash"></i> Ẩn bài kiểm tra</button>
+            </div></div>
+            {{/if}}
+            {{#if (eq quiz.status 'INACTIVE')}}
+            <div class="card"><div class="card-body">
+                <button type="button" class="btn btn-primary btn-block" data-delete-action="/cms/quizzes/{{quiz.id}}/show" data-confirm-title="Bạn có chắc chắn muốn hiện lại bài kiểm tra này không?" data-delete-name="{{quiz.title}}"><i class="fas fa-eye"></i> Hiện lại bài kiểm tra</button>
+            </div></div>
+            {{/if}}
+        {{/if}}
+    </div>
+</div>

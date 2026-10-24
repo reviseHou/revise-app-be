@@ -18,7 +18,7 @@ export class UploadController {
     FileInterceptor('file', {
       storage: memoryStorage(),
       limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB limit
+        fileSize: 10 * 1024 * 1024,
       },
       fileFilter: (req, file, cb) => {
         const allowedExtensions = [
