@@ -74,7 +74,7 @@ export class SubjectController {
   })
   async createSubject(@Body() form: SubjectForm) {
     const subject = await this.subjectBean.create(form);
-    return `Đã tạo môn ${subject.title}`;
+    return `Đã tạo môn ${subject.name}`;
   }
 
   @Post(':id')
@@ -87,20 +87,20 @@ export class SubjectController {
     @Body() form: SubjectForm,
   ) {
     const subject = await this.subjectBean.update(id, form);
-    return `Đã cập nhật môn ${subject.title}`;
+    return `Đã cập nhật môn ${subject.name}`;
   }
 
   @Post(':id/delete')
   @CmsAction(CmsPermission.UPDATE_SUBJECT, { to: LIST, onError: LIST })
   async deleteSubject(@Param('id', ParseIntPipe) id: number) {
     const subject = await this.subjectBean.remove(id);
-    return `Đã xóa môn ${subject.title}`;
+    return `Đã xóa môn ${subject.name}`;
   }
 
   @Post(':id/toggle-status')
   @CmsAction(CmsPermission.UPDATE_SUBJECT, { to: LIST })
   async toggleSubjectStatus(@Param('id', ParseIntPipe) id: number) {
     const subject = await this.subjectBean.toggleStatus(id);
-    return `Đã đổi trạng thái môn ${subject.title}`;
+    return `Đã đổi trạng thái môn ${subject.name}`;
   }
 }

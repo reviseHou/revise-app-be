@@ -6,7 +6,13 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ActiveStatus, QuizStatus } from '../enums';
-import { RejectDocumentForm } from '../forms';
+import {
+  FacultyScope,
+  applyFacultyScope,
+  assertInFacultyScope,
+  facultyScopeOf,
+} from '../faculty-scope';
+import { RejectDocumentForm, listOf } from '../forms';
 import { PAGE_SIZE, likeOf, offsetOf } from '../paging';
 import { Users } from '../user/entity/user.entity';
 import { Questions } from './entity/question.entity';
@@ -23,9 +29,15 @@ export class QuizBean {
     private readonly questionRepository: Repository<Questions>,
   ) {}
 
-  async countByStatus() {
-    const rows = await this.quizRepository
-      .createQueryBuilder('quiz')
+  async countByStatus(scope: FacultyScope) {
+    const query = this.quizRepository.createQueryBuilder('quiz');
+    if (scope !== null) {
+      query
+        .innerJoin('quiz.subject', 'scopeSubject')
+        .innerJoin('scopeSubject.major', 'scopeMajor');
+      applyFacultyScope(query, scope, '"scopeMajor"."faculty_id"');
+    }
+    const rows = await query
       .select('quiz.status', 'status')
       .addSelect('COUNT(quiz.id)', 'count')
       .groupBy('quiz.status')
@@ -36,7 +48,12 @@ export class QuizBean {
     return countByStatus;
   }
 
-  async search(keyword: string, status: QuizStatus | undefined, page: number) {
+  async search(
+    keyword: string,
+    status: QuizStatus | undefined,
+    page: number,
+    scope: FacultyScope,
+  ) {
     const oldestFirst = status === QuizStatus.PENDING;
     const query = this.quizRepository
       .createQueryBuilder('quiz')
@@ -44,27 +61,19 @@ export class QuizBean {
       .leftJoinAndSelect('quiz.subject', 'subject')
       .leftJoinAndSelect('subject.major', 'major')
       .leftJoinAndSelect('major.faculty', 'faculty')
-      .loadRelationCountAndMap(
-        'quiz.questionCount',
-        'quiz.questions',
-        'question',
-        (sub) =>
-          sub.where('question.status = :active', {
-            active: ActiveStatus.ACTIVE,
-          }),
-      )
-      .orderBy('quiz.updateAt', oldestFirst ? 'ASC' : 'DESC')
+      .orderBy('quiz.dateModified', oldestFirst ? 'ASC' : 'DESC')
       .skip(offsetOf(page))
       .take(PAGE_SIZE);
+    applyFacultyScope(query, scope, 'faculty.id');
     if (status) query.andWhere('quiz.status = :status', { status });
     if (keyword) {
-      query.andWhere('quiz.title ILIKE :like', { like: likeOf(keyword) });
+      query.andWhere('quiz.name ILIKE :like', { like: likeOf(keyword) });
     }
     const [quizzes, total] = await query.getManyAndCount();
     return { quizzes, total };
   }
 
-  async findById(id: number) {
+  async findById(id: number, scope: FacultyScope) {
     const quiz = await this.quizRepository.findOne({
       where: { id },
       relations: [
@@ -76,6 +85,7 @@ export class QuizBean {
       ],
     });
     if (!quiz) throw new NotFoundException('Không tìm thấy bài kiểm tra');
+    assertInFacultyScope(scope, quiz.subject?.major?.faculty?.id);
     const questions = await this.questionRepository.find({
       where: { quiz: { id }, status: ActiveStatus.ACTIVE },
       relations: ['answers'],
@@ -125,7 +135,7 @@ export class QuizBean {
 
   private buildRejectReason(form: RejectDocumentForm) {
     const validCodes = QUIZ_REVIEW_CRITERIA.map((criteria) => criteria.code);
-    const codes = (form.criteria ?? []).filter((code) =>
+    const codes = listOf(form.criteria).filter((code) =>
       validCodes.includes(code),
     );
     const note = (form.note ?? '').trim();
@@ -146,9 +156,18 @@ export class QuizBean {
   ) {
     const quiz = await this.quizRepository.findOne({
       where: { id },
-      relations: ['createdBy'],
+      relations: [
+        'createdBy',
+        'subject',
+        'subject.major',
+        'subject.major.faculty',
+      ],
     });
     if (!quiz) throw new NotFoundException('Không tìm thấy bài kiểm tra');
+    assertInFacultyScope(
+      facultyScopeOf(reviewer),
+      quiz.subject?.major?.faculty?.id,
+    );
     if (quiz.createdBy?.id === reviewer.id) {
       throw new BadRequestException(
         'Không được duyệt bài kiểm tra do chính mình tạo',

@@ -13,9 +13,10 @@ import { AuthGuard } from '@nestjs/passport';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import type { Request, Response } from 'express';
 import { startCmsSession } from 'src/cms/util/cms.auth';
+import type { GoogleUser } from './auth.type';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
-const HOU_EMAIL = /^[^@]+@([a-zA-Z0-9_\-]+\.)*hou\.edu\.vn$/;
+const HOU_EMAIL = /^[^@]+@([\w-]+\.)*hou\.edu\.vn$/;
 
 @Controller('auth')
 export class AuthController {
@@ -28,43 +29,50 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(GoogleAuthGuard)
-  async googleAuth() {}
+  googleAuth() {}
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req: any, @Res() res: Response) {
-    if (req.query?.state === 'cms') {
-      return this.loginCms(req, res);
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    const googleUser = req.user as GoogleUser;
+    const fromCms = req.query.state === 'cms';
+    if (!HOU_EMAIL.test(googleUser.email)) {
+      return fromCms
+        ? this.backToCmsLogin(
+            req,
+            res,
+            'Chỉ chấp nhận tài khoản email của trường',
+          )
+        : res.redirect(`${FRONTEND_URL}/login?error=unauthorized_email`);
     }
+    return fromCms
+      ? this.loginCms(req, res, googleUser)
+      : this.loginWeb(res, googleUser);
+  }
 
-    const email = req.user?.email;
-    if (!email || !HOU_EMAIL.test(email)) {
-      return res.redirect(`${FRONTEND_URL}/login?error=unauthorized_email`);
-    }
-
-    const data = await this.authService.loginWithGoogle(req.user);
-
+  private async loginWeb(res: Response, googleUser: GoogleUser) {
+    const account = await this.authService.findOrCreateGoogleUser(googleUser);
+    const data = this.authService.issueTokens(account);
     const params = new URLSearchParams({
       accessToken: data.accessToken,
       refreshToken: data.refreshToken,
       user: JSON.stringify(data.user),
     });
-
     return res.redirect(`${FRONTEND_URL}/auth/callback?${params.toString()}`);
   }
 
-  private async loginCms(req: Request, res: Response) {
-    const googleUser = req.user as { email?: string } | undefined;
-    const toLogin = (content: string) => {
-      req.session.info = { type: 'error', content };
-      return res.redirect('/cms/login');
-    };
-    if (!googleUser?.email || !HOU_EMAIL.test(googleUser.email)) {
-      return toLogin('Chỉ chấp nhận tài khoản email của trường');
-    }
-    const { user } = await this.authService.loginWithGoogle(googleUser);
-    return (await startCmsSession(req, user))
+  private async loginCms(req: Request, res: Response, googleUser: GoogleUser) {
+    const account = await this.authService
+      .findOrCreateGoogleUser(googleUser)
+      .catch(() => null);
+    if (!account) return this.backToCmsLogin(req, res, 'Tài khoản đã bị khoá');
+    return (await startCmsSession(req, account))
       ? res.redirect('/cms')
-      : toLogin('Tài khoản không có quyền vào CMS');
+      : this.backToCmsLogin(req, res, 'Tài khoản không có quyền vào CMS');
+  }
+
+  private backToCmsLogin(req: Request, res: Response, content: string) {
+    req.session.info = { type: 'error', content };
+    return res.redirect('/cms/login');
   }
 }

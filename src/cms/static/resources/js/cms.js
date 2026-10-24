@@ -22,7 +22,23 @@ $(function () {
     }
 
     setUpPermissionsPicker();
+    setUpFacultyPicker();
 });
+
+function setUpFacultyPicker() {
+    var $role = $('#roleId');
+    var $group = $('#facultyGroup');
+    if (!$role.length || !$group.length) return;
+    var $faculty = $('#facultyId');
+    function sync() {
+        var codes = String($role.find('option:selected').data('permissions') || '').split(',');
+        var canReview = codes.indexOf('REVIEW_DOCUMENT') >= 0 || codes.indexOf('REVIEW_QUIZ') >= 0;
+        $group.toggle(canReview);
+        $faculty.prop('disabled', !canReview);
+    }
+    $role.on('change', sync);
+    sync();
+}
 
 function setUpPermissionsPicker() {
     var $available = $('#availableList');

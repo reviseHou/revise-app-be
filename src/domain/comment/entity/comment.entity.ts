@@ -4,6 +4,7 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -24,12 +25,15 @@ export class Comments {
   sourceId: string;
 
   @ManyToOne(() => Users, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
   user: Users;
 
   @ManyToOne(() => Comments, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'parent_id' })
   parent?: Comments | null;
 
   @ManyToOne(() => Users, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'reply_to_user_id' })
   replyToUser?: Users | null;
 
   @Column({ type: 'varchar', length: 1000 })
@@ -39,8 +43,8 @@ export class Comments {
   status: ActiveStatus;
 
   @CreateDateColumn()
-  createdAt: Date;
+  dateCreated: Date;
 
   @UpdateDateColumn()
-  updateAt: Date;
+  dateModified: Date;
 }

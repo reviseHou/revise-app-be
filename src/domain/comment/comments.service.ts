@@ -10,41 +10,10 @@ import { Documents } from '../document/entity/document.entity';
 import { ActiveStatus, SourceType, QuizStatus } from '../enums';
 import { Quizzes } from '../quiz/entity/quiz.entity';
 import { Users } from '../user/entity/user.entity';
+import { SourceKeyDto } from '../validation';
 import { CommentView, toCommentView } from './comment.view';
 import { CreateCommentDto, UpdateCommentDto } from './dto/comments.dto';
 import { Comments } from './entity/comment.entity';
-
-const MAX_CONTENT = 1000;
-
-function parseSource(sourceType: unknown, sourceId: unknown) {
-  if (!Object.values(SourceType).includes(sourceType as SourceType)) {
-    throw new BadRequestException('sourceType phải là DOCUMENT hoặc QUIZ');
-  }
-  const id = Number(sourceId);
-  if (!Number.isInteger(id) || id <= 0) {
-    throw new BadRequestException('sourceId không hợp lệ');
-  }
-  return { sourceType: sourceType as SourceType, sourceId: id };
-}
-
-function parseContent(content: unknown) {
-  const text = typeof content === 'string' ? content.trim() : '';
-  if (!text)
-    throw new BadRequestException('Nội dung bình luận không được trống');
-  if (text.length > MAX_CONTENT) {
-    throw new BadRequestException(`Bình luận tối đa ${MAX_CONTENT} ký tự`);
-  }
-  return text;
-}
-
-function optionalId(value: unknown, field: string) {
-  if (value === undefined || value === null) return undefined;
-  const id = Number(value);
-  if (!Number.isInteger(id) || id <= 0) {
-    throw new BadRequestException(`${field} không hợp lệ`);
-  }
-  return id;
-}
 
 @Injectable()
 export class CommentsService {
@@ -59,15 +28,11 @@ export class CommentsService {
     private readonly usersRepository: Repository<Users>,
   ) {}
 
-  async list(sourceTypeInput: unknown, sourceIdInput: unknown) {
-    const { sourceType, sourceId } = parseSource(
-      sourceTypeInput,
-      sourceIdInput,
-    );
+  async list({ sourceType, sourceId }: SourceKeyDto) {
     const comments = await this.commentsRepository.find({
       where: { sourceType, sourceId: String(sourceId) },
       relations: ['user', 'parent', 'replyToUser'],
-      order: { createdAt: 'ASC' },
+      order: { dateCreated: 'ASC' },
     });
 
     const roots: CommentView[] = [];
@@ -89,14 +54,7 @@ export class CommentsService {
   }
 
   async create(user: Users, body: CreateCommentDto): Promise<CommentView> {
-    const { sourceType, sourceId } = parseSource(
-      body?.sourceType,
-      body?.sourceId,
-    );
-    const content = parseContent(body?.content);
-    const parentId = optionalId(body?.parentId, 'parentId');
-    const replyToUserId = optionalId(body?.replyToUserId, 'replyToUserId');
-
+    const { sourceType, sourceId, content, parentId, replyToUserId } = body;
     await this.assertSourceExists(sourceType, sourceId);
     const parent = parentId
       ? await this.findRootParent(parentId, sourceType, sourceId)
@@ -123,7 +81,7 @@ export class CommentsService {
 
   async update(user: Users, id: number, body: UpdateCommentDto) {
     const comment = await this.findOwnedActive(user, id);
-    comment.content = parseContent(body?.content);
+    comment.content = body.content;
     await this.commentsRepository.save(comment);
     return this.view(comment.id);
   }
@@ -177,7 +135,7 @@ export class CommentsService {
   private async assertSourceExists(sourceType: SourceType, sourceId: number) {
     const exists =
       sourceType === SourceType.DOCUMENT
-        ? await this.documentsRepository.existsBy({ id: sourceId })
+        ? await this.documentsRepository.existsBy({ id: String(sourceId) })
         : await this.quizzesRepository.existsBy({
             id: sourceId,
             status: QuizStatus.ACTIVE,

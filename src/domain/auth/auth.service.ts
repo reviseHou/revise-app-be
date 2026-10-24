@@ -1,65 +1,72 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { WEB_USER_ROLE } from 'src/constants';
+import { ActiveStatus } from '../enums';
 import { UsersService } from '../user/users.service';
 import { Users } from '../user/entity/user.entity';
 import { RefreshTokenDto } from './dto/auth.dto';
-import { UserJwtPayload } from './auth.type';
+import { GoogleUser, UserJwtPayload } from './auth.type';
 
 const REFRESH_TOKEN_EXPIRES_IN = '12h';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
-
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
   ) {}
 
-  async loginWithGoogle(googleUser: any) {
-    if (!googleUser || !googleUser.email) {
-      throw new UnauthorizedException('Invalid Google user');
-    }
-
-    let user = await this.usersService.findUserbyEmail(googleUser.email);
-
-    if (!user) {
-      user = await this.usersService.create({
+  async findOrCreateGoogleUser(googleUser: GoogleUser) {
+    const user =
+      (await this.usersService.findUserById(googleUser.id)) ??
+      (await this.usersService.create({
+        id: googleUser.id,
         email: googleUser.email,
-        username: googleUser.username,
-        avatarUrl: googleUser.avatarUrl,
-        roleId: Number(process.env.WEB_USER_ROLE_ID),
-        createdAt: new Date(),
-        updateAt: new Date(),
-      });
-    }
+        fullName: googleUser.fullName,
+        avatar: googleUser.avatar,
+        roleCode: WEB_USER_ROLE,
+      }));
 
-    return this.issueTokens(user);
+    this.assertActive(user);
+    return user;
   }
 
   async refreshToken(dto: RefreshTokenDto) {
+    let decoded: UserJwtPayload;
     try {
-      const decoded = this.jwtService.verify<UserJwtPayload>(dto.refreshToken, {
+      decoded = this.jwtService.verify<UserJwtPayload>(dto.refreshToken, {
         secret: process.env.REFRESH_TOKEN_SECRET,
       });
-      const user = await this.usersService.findUserById(decoded.sub);
-      return this.issueTokens(user);
-    } catch (error) {
-      this.logger.error('Failed to refresh token', error.stack);
+    } catch {
       throw new UnauthorizedException('Invalid refresh token');
+    }
+    const user = await this.usersService.findUserById(decoded.sub);
+    if (!user) throw new UnauthorizedException('Invalid refresh token');
+    this.assertActive(user);
+    return this.issueTokens(user);
+  }
+
+  private assertActive(user: Users) {
+    if (user.status !== ActiveStatus.ACTIVE) {
+      throw new UnauthorizedException('Tài khoản đã bị khoá');
     }
   }
 
-  private issueTokens(user: Users) {
+  issueTokens(user: Users) {
     const payload: UserJwtPayload = { sub: user.id, email: user.email };
-
     return {
       accessToken: this.jwtService.sign(payload),
       refreshToken: this.jwtService.sign(payload, {
         secret: process.env.REFRESH_TOKEN_SECRET,
         expiresIn: REFRESH_TOKEN_EXPIRES_IN,
       }),
-      user,
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        avatar: user.avatar,
+        dateCreated: user.dateCreated,
+      },
     };
   }
 }

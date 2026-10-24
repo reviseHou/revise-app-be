@@ -48,7 +48,6 @@ DB_NAME=revise-app
 SECRET_KEY=<chuỗi ngẫu nhiên bất kỳ>
 REFRESH_TOKEN_SECRET=<chuỗi ngẫu nhiên khác>
 SESSION_SECRET=<chuỗi ngẫu nhiên khác>
-WEB_USER_ROLE_ID=            # để trống, điền ở bước 5
 
 GOOGLE_CLIENT_ID=<client id>
 GOOGLE_CLIENT_SECRET=<client secret>
@@ -87,28 +86,31 @@ docker exec -it course-db psql -U postgres -d revise-app
 
 (hoặc dùng DBeaver / pgAdmin: host `localhost`, cổng `5432`, user và mật khẩu như trong `.env`).
 
+Tên bảng và cột đều là snake_case số ít, đúng theo diagram: `"user"`, `role`, `permission`, `role_permission`, ... Bảng `user` trùng từ khoá của PostgreSQL nên luôn viết trong ngoặc kép `"user"`.
+
 **5.1. Tạo 3 vai trò**
 
 | Vai trò | Dùng cho |
 |---|---|
-| `ADMIN` | Quản trị viên, có quyền `*` (vào mọi màn CMS) |
+| `ADMIN` | Quản trị viên, được gán đủ mọi quyền (vào mọi màn CMS) |
 | `USER` | Gán tự động cho mọi tài khoản đăng nhập web lần đầu. Không vào được CMS |
-| `STUDENT` | Sinh viên. Không vào được CMS |
+| `LECTURER` | Giảng viên. Vào CMS để xem danh mục và duyệt tài liệu, bài kiểm tra (quyền gán ở bước 5.3) |
 
 ```sql
-INSERT INTO roles (name)
-SELECT v.name FROM (VALUES ('ADMIN'), ('USER'), ('STUDENT')) AS v(name)
-WHERE NOT EXISTS (SELECT 1 FROM roles r WHERE UPPER(r.name) = v.name);
+INSERT INTO role (code, name)
+SELECT v.code, v.name FROM (VALUES
+    ('ADMIN', 'Quản trị viên'), ('USER', 'Người dùng'), ('LECTURER', 'Giảng viên')
+) AS v(code, name)
+WHERE NOT EXISTS (SELECT 1 FROM role r WHERE r.code = v.code);
 ```
 
 **5.2. Tạo danh sách quyền**
 
-Tên quyền phải khớp `src/cms/util/cms.permission.ts`. `*` là mọi quyền.
+Mã quyền (`code`) phải khớp `src/cms/util/cms.permission.ts`. Không có quyền "tất cả": vai trò nào được làm gì thì gán đúng mã quyền đó.
 
 ```sql
-INSERT INTO permissions (name)
-SELECT v.name FROM (VALUES
-    ('*'),
+INSERT INTO permission (code, name)
+SELECT v.code, v.code FROM (VALUES
     ('READ_STATISTICS'),
     ('READ_FACULTY'), ('CREATE_FACULTY'), ('UPDATE_FACULTY'),
     ('READ_MAJOR'), ('CREATE_MAJOR'), ('UPDATE_MAJOR'),
@@ -118,59 +120,49 @@ SELECT v.name FROM (VALUES
     ('READ_USER'), ('ASSIGN_ROLE'),
     ('READ_ROLE'), ('CREATE_ROLE'), ('UPDATE_ROLE'), ('DELETE_ROLE'),
     ('READ_PERMISSION'), ('CREATE_PERMISSION')
-) AS v(name)
-WHERE NOT EXISTS (SELECT 1 FROM permissions p WHERE p.name = v.name);
+) AS v(code)
+WHERE NOT EXISTS (SELECT 1 FROM permission p WHERE p.code = v.code);
 ```
 
-**5.3. Gán quyền `*` cho `ADMIN`**
+Cột `name` có thể sửa lại thành tên tiếng Việt dễ đọc trên CMS.
+
+**5.3. Gán quyền cho `ADMIN` và `LECTURER`**
+
+`ADMIN` có tất cả quyền. `LECTURER` xem danh mục, xem thống kê và duyệt tài liệu, bài kiểm tra; không tạo/sửa danh mục, không quản lý người dùng, vai trò, quyền.
 
 ```sql
-INSERT INTO roles_permissions_permissions ("rolesId", "permissionsId")
+INSERT INTO role_permission (role_id, permission_id)
 SELECT r.id, p.id
-FROM roles r, permissions p
-WHERE UPPER(r.name) = 'ADMIN' AND p.name = '*'
-  AND NOT EXISTS (
-    SELECT 1 FROM roles_permissions_permissions rp
-    WHERE rp."rolesId" = r.id AND rp."permissionsId" = p.id
+FROM role r JOIN permission p ON
+     r.code = 'ADMIN'
+  OR (r.code = 'LECTURER' AND p.code IN (
+        'READ_STATISTICS', 'READ_FACULTY', 'READ_MAJOR', 'READ_SUBJECT',
+        'READ_DOCUMENT', 'REVIEW_DOCUMENT', 'READ_QUIZ', 'REVIEW_QUIZ'))
+WHERE NOT EXISTS (
+    SELECT 1 FROM role_permission rp
+    WHERE rp.role_id = r.id AND rp.permission_id = p.id
   );
 ```
 
 **5.4. Tạo tài khoản quản trị**
 
-Thay email bằng email `hou.edu.vn` **của bạn** (phải đúng email sẽ dùng để đăng nhập Google), thay tên hiển thị tuỳ ý:
+Id của người dùng là mã tài khoản Google (Google `sub`), chỉ có khi người đó đăng nhập, nên không tạo trước bằng SQL được. Làm như sau:
+
+1. Chạy server (bước 6), vào http://localhost:4000/cms → *Đăng nhập bằng Google* bằng email `hou.edu.vn` **của bạn**. Lần này sẽ báo "Tài khoản không có quyền vào CMS", nhưng tài khoản đã được tạo với vai trò `USER`.
+2. Nâng tài khoản lên `ADMIN`:
 
 ```sql
-INSERT INTO users (username, email, "roleId")
-SELECT 'Quản trị viên', 'email-cua-ban@students.hou.edu.vn', r.id
-FROM roles r
-WHERE UPPER(r.name) = 'ADMIN'
-  AND NOT EXISTS (SELECT 1 FROM users u WHERE u.email = 'email-cua-ban@students.hou.edu.vn');
-```
-
-Đã đăng nhập bằng email đó trước khi chạy câu trên (tài khoản đã có với vai trò `USER`) thì nâng lên `ADMIN`:
-
-```sql
-UPDATE users
-SET "roleId" = (SELECT id FROM roles WHERE UPPER(name) = 'ADMIN')
+UPDATE "user"
+SET role_id = (SELECT id FROM role WHERE code = 'ADMIN')
 WHERE email = 'email-cua-ban@students.hou.edu.vn';
 ```
 
-**5.5. Lấy id của vai trò `USER` điền vào `.env`**
+3. Đăng nhập CMS lại.
+
+**5.5. Kiểm tra**
 
 ```sql
-SELECT id FROM roles WHERE UPPER(name) = 'USER';
-```
-
-```
-WEB_USER_ROLE_ID=<id vừa lấy>
-```
-
-Thiếu hoặc sai biến này thì lần đăng nhập web đầu tiên của mọi người sẽ lỗi khi tạo tài khoản.
-
-**5.6. Kiểm tra**
-
-```sql
-SELECT u.email, r.name AS role FROM users u JOIN roles r ON r.id = u."roleId";
+SELECT u.email, r.code AS role FROM "user" u JOIN role r ON r.id = u.role_id;
 ```
 
 Phải thấy email của bạn với vai trò `ADMIN`.
@@ -183,10 +175,10 @@ pnpm dev
 
 Trên Windows có thể chạy `start-dev.bat` (tự bật DB rồi chạy `pnpm dev`).
 
-- CMS: http://localhost:4000/cms → *Đăng nhập bằng Google* → chọn đúng email ở bước 5.4
+- CMS: http://localhost:4000/cms → *Đăng nhập bằng Google* → chọn email của bạn (xem bước 5.4)
 - Swagger: http://localhost:4000/swagger
 
-Báo "Tài khoản không có quyền vào CMS" nghĩa là tài khoản đang có vai trò `USER`/`STUDENT`: chạy lại câu `UPDATE` ở bước 5.4.
+Báo "Tài khoản không có quyền vào CMS" nghĩa là tài khoản đang có vai trò `USER`: chạy câu `UPDATE` ở bước 5.4.
 
 ### 7. Nhập danh mục
 
@@ -204,17 +196,16 @@ Muốn cho giảng viên duyệt nội dung: vào **Vai trò** tạo vai trò m�
 | `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_NAME` | Kết nối PostgreSQL |
 | `SECRET_KEY` | Khoá ký access token (JWT) của API |
 | `REFRESH_TOKEN_SECRET` | Khoá ký refresh token của API (sống 12 giờ) |
-| `WEB_USER_ROLE_ID` | Id của role `USER` trong bảng `roles`, gán cho tài khoản đăng nhập web lần đầu (xem bên dưới) |
 | `SESSION_SECRET` | Khoá ký cookie session của CMS. **Bắt buộc**, thiếu thì server không khởi động |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CALLBACK_URL` | Đăng nhập Google |
-| `FRONTEND_URL` | Địa chỉ frontend, nơi API chuyển hướng sau khi đăng nhập |
+| `FRONTEND_URL` | Địa chỉ frontend: nơi API chuyển hướng sau khi đăng nhập, và được thêm vào danh sách CORS (ngoài `https://revise-hou.tech` và `http://localhost:5173`). Chạy FE ở `http://127.0.0.1:5173` thì đặt biến này thành địa chỉ đó |
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_UPLOAD_FOLDER` | Upload tệp |
 
 ### Role mặc định của người dùng web
 
 Web không phân quyền: ai đăng nhập bằng email trường cũng dùng được mọi API của web. Role chỉ dùng cho CMS.
 
-Tài khoản đăng nhập web lần đầu được gán role `USER` (id lấy từ `WEB_USER_ROLE_ID`, cách tạo ở bước 5). Role này **không gắn permission** và **không vào được CMS** (`canEnterCms` chặn `USER` và `STUDENT`). Muốn cho ai vào CMS thì admin đổi role của người đó trên CMS.
+Tài khoản đăng nhập web lần đầu được gán role `USER` (tìm theo `code = 'USER'` trong bảng `role`, tạo ở bước 5.1; thiếu role này thì đăng nhập lần đầu sẽ báo lỗi). Role này **không gắn permission** và **không vào được CMS** (`canEnterCms` chặn `USER`). Muốn cho ai vào CMS thì admin đổi role của người đó trên CMS.
 
 ### Lệnh thường dùng
 
@@ -292,23 +283,23 @@ Tất cả cần `Authorization: Bearer <accessToken>`. Bảng `quizzes`, `quest
 | PATCH | `/api/comments/:id` | Sửa nội dung, chỉ người viết |
 | DELETE | `/api/comments/:id` | Xóa mềm (`INACTIVE`), chỉ người viết |
 
-Hạn làm bài là `dateStarted + durationMinutes`, cho thêm 30 giây trễ mạng. Chỉ chủ lượt làm mới xem và sửa được lượt đó.
+Hạn làm bài là `dateStarted + estimateMinute`, cho thêm 30 giây trễ mạng. Chỉ chủ lượt làm mới xem và sửa được lượt đó.
 
 ### Tạo bài kiểm tra
 
-Ai đăng nhập web cũng tạo được. Bài mới ở trạng thái `PENDING`, chỉ hiện cho mọi người sau khi được duyệt trên CMS (`/cms/quizzes`, quyền `READ_QUIZ`, `REVIEW_QUIZ`; role có `*` dùng được ngay, role khác phải thêm 2 quyền này vào bảng `permissions` rồi gán).
+Ai đăng nhập web cũng tạo được. Bài mới ở trạng thái `PENDING`, chỉ hiện cho mọi người sau khi được duyệt trên CMS (`/cms/quizzes`, quyền `READ_QUIZ`, `REVIEW_QUIZ`; vai trò nào có 2 quyền này thì duyệt được).
 
 | Method | Đường dẫn | Việc |
 |---|---|---|
 | GET | `/api/quizzes/mine` | Bài của mình (mọi trạng thái trừ đã xóa), kèm `status`, `rejectReason` |
-| POST | `/api/quizzes` | Tạo bài từ `QuizContext`: `{ title, description?, subjectId, durationMinutes (1–180), questions: [{ title, explanation?, answers: [{ title, isCorrect }] }] }`. Mỗi câu 2–6 phương án, đúng 1 phương án `isCorrect` |
+| POST | `/api/quizzes` | Tạo bài từ `QuizContext`: `{ name, description?, subjectId, estimateMinute (1–180), questions: [{ title, explanation?, answers: [{ title, isCorrect }] }] }`. Mỗi câu 2–6 phương án, đúng 1 phương án `isCorrect` |
 | GET | `/api/quizzes/:id/edit` | Lấy lại `QuizContext` để sửa (có `isCorrect`), chỉ người tạo |
 | PUT | `/api/quizzes/:id` | Sửa toàn bộ bài, đưa về `PENDING`. Bài đã có lượt làm thì trả 409 |
 | DELETE | `/api/quizzes/:id` | Ẩn bài (`INACTIVE`), chỉ người tạo |
 
 ### Danh sách đã lưu
 
-Bảng `saved_items` (`userId`, `sourceType` = `DOCUMENT` \| `QUIZ`, `sourceId`), mỗi người lưu một nội dung một lần.
+Bảng `saved_item` (`user_id`, `source_type` = `DOCUMENT` \| `QUIZ`, `source_id`), mỗi người lưu một nội dung một lần.
 
 | Method | Đường dẫn | Việc |
 |---|---|---|
@@ -322,12 +313,12 @@ Bảng `saved_items` (`userId`, `sourceType` = `DOCUMENT` \| `QUIZ`, `sourceId`)
 ### Đăng nhập
 1. Vào `/cms/login`, bấm đăng nhập bằng Google (`/api/auth/google?from=cms`).
 2. Google gọi lại `/api/auth/google/callback`. Nhánh CMS kiểm tra email trường, tìm hoặc tạo user, rồi lưu `userId` vào session.
-3. Tài khoản có vai trò `USER` hoặc `STUDENT` không được vào CMS.
+3. Tài khoản có vai trò `USER` không được vào CMS.
 
 ### Mỗi request vào trang CMS
 1. Session middleware đọc cookie `cms.sid` và nạp session từ DB (bảng `cms_sessions`).
 2. `CmsSessionGuard` nạp user kèm vai trò và quyền. Chưa đăng nhập thì chuyển về `/cms/login`.
-3. `PermissionsGuard`: kiểm tra quyền khai báo ở `@CmsView` / `@CmsAction`. Quyền `*` được vào mọi nơi.
+3. `PermissionsGuard`: kiểm tra quyền khai báo ở `@CmsView` / `@CmsAction`. Vai trò phải có đúng mã quyền đó.
 4. Controller gọi bean, trả dữ liệu cho view hoặc chuyển hướng.
 5. Lỗi đi qua `CmsErrorFilter`.
 
@@ -374,8 +365,9 @@ export class CourseController {
 
 ## Phân quyền
 
-- Mỗi vai trò (`roles`) có nhiều quyền (`permissions`). Tên quyền dùng ở `@CmsView`, `@CmsAction` và API `@Permissions`.
-- Quyền `*` cho phép mọi thao tác. Vai trò `ADMIN` thường có quyền này.
+- Mỗi vai trò (`role`) có nhiều quyền (`permission`) qua bảng `role_permission`. Mã quyền (`code`) dùng ở `@CmsView`, `@CmsAction` và API `@Permissions`.
+- Không có quyền "tất cả". `ADMIN` được gán đủ từng quyền; thêm quyền mới thì nhớ gán cho `ADMIN`.
+- **Khoa phụ trách:** khi đổi vai trò ở màn **Người dùng**, nếu vai trò có quyền `REVIEW_DOCUMENT` hoặc `REVIEW_QUIZ` thì hiện thêm ô *Khoa*. Chọn khoa thì người đó chỉ xem, duyệt và thống kê được tài liệu, bài kiểm tra thuộc khoa đó (lưu ở `user.faculty_id`). Để trống thì thấy mọi khoa. Danh mục Khoa/Ngành/Môn vẫn xem được hết.
 - Quản lý vai trò và quyền ngay trong CMS ở mục **Vai trò** và **Quyền**.
 
 ## Lưu ý khi phát triển

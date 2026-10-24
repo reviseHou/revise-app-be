@@ -11,6 +11,7 @@ import {
 import { DocumentBean } from 'src/domain/document/document.bean';
 import { REVIEW_CRITERIA } from 'src/domain/document/document.criteria';
 import { DocumentStatus } from 'src/domain/enums';
+import { facultyScopeOf } from 'src/domain/faculty-scope';
 import type { RejectDocumentForm } from 'src/domain/forms';
 import { CmsAction, CmsController, CmsView } from '../cms.decorator';
 import { CmsPermission } from '../util/cms.permission';
@@ -30,7 +31,9 @@ export class DocumentController {
     @Query('keyword') keywordParam: string | undefined,
     @Query('status') statusParam: string | undefined,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) pageParam: number,
+    @Req() request: CmsRequest,
   ) {
+    const scope = facultyScopeOf(request.user);
     const keyword = (keywordParam ?? '').trim();
     const page = Math.max(1, pageParam);
     const status =
@@ -42,8 +45,9 @@ export class DocumentController {
       keyword,
       status,
       page,
+      scope,
     );
-    const countByStatus = await this.documentBean.countByStatus();
+    const countByStatus = await this.documentBean.countByStatus(scope);
     return {
       status: status ?? ALL_STATUS,
       keyword,
@@ -57,9 +61,15 @@ export class DocumentController {
 
   @Get(':id')
   @CmsView(CmsPermission.READ_DOCUMENT, 'document/detail')
-  async showDocument(@Param('id', ParseIntPipe) id: number) {
+  async showDocument(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() request: CmsRequest,
+  ) {
     return {
-      document: await this.documentBean.findById(id),
+      document: await this.documentBean.findById(
+        id,
+        facultyScopeOf(request.user),
+      ),
       criteria: REVIEW_CRITERIA,
     };
   }

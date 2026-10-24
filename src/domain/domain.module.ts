@@ -13,6 +13,9 @@ import { Quizzes } from './quiz/entity/quiz.entity';
 import { Permissions } from './permission/entity/permission.entity';
 import { RoleBean } from './role/role.bean';
 import { Roles } from './role/entity/role.entity';
+import { RolePermissions } from './role/entity/role-permission.entity';
+import { DocumentViews } from './document/entity/document-view.entity';
+import { Ratings } from './rating/entity/rating.entity';
 import { SubjectBean } from './subject/subject.bean';
 import { Subjects } from './subject/entity/subject.entity';
 import { UserBean } from './user/user.bean';
@@ -35,6 +38,9 @@ const beans = [
       Users,
       Roles,
       Permissions,
+      RolePermissions,
+      DocumentViews,
+      Ratings,
       Documents,
       Quizzes,
       Questions,

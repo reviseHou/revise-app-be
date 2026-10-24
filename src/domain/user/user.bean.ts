@@ -1,6 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { FacultyBean } from '../faculty/faculty.bean';
 import { AssignRoleForm } from '../forms';
 import { RoleBean } from '../role/role.bean';
 import { PAGE_SIZE, likeOf, offsetOf } from '../paging';
@@ -18,6 +23,7 @@ export class UserBean {
     @InjectRepository(Users)
     private readonly userRepository: Repository<Users>,
     private readonly roleBean: RoleBean,
+    private readonly facultyBean: FacultyBean,
   ) {}
 
   count() {
@@ -42,11 +48,12 @@ export class UserBean {
     const query = this.userRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.role', 'role')
-      .orderBy('user.id', 'DESC')
+      .leftJoinAndSelect('user.faculty', 'faculty')
+      .orderBy('user.dateCreated', 'DESC')
       .skip(offsetOf(page))
       .take(PAGE_SIZE);
     if (keyword) {
-      query.where('(user.username ILIKE :like OR user.email ILIKE :like)', {
+      query.where('(user.fullName ILIKE :like OR user.email ILIKE :like)', {
         like: likeOf(keyword),
       });
     }
@@ -55,19 +62,20 @@ export class UserBean {
     return { users, total };
   }
 
-  async assignRole(userId: number, form: AssignRoleForm) {
+  async assignRole(userId: string, form: AssignRoleForm) {
+    if (!form.roleId) throw new BadRequestException('Cần chọn vai trò');
     const user = await this.findById(userId);
-    const role = form.roleId
-      ? await this.roleBean.findById(Number(form.roleId))
+    user.role = await this.roleBean.findById(Number(form.roleId));
+    user.faculty = form.facultyId
+      ? await this.facultyBean.findById(Number(form.facultyId))
       : null;
-    Object.assign(user, { role });
     return this.userRepository.save(user);
   }
 
-  async findById(id: number) {
+  async findById(id: string) {
     const user = await this.userRepository.findOne({
       where: { id },
-      relations: ['role'],
+      relations: ['role', 'faculty'],
     });
     if (!user) throw new NotFoundException('Không tìm thấy người dùng');
     return user;

@@ -10,22 +10,23 @@ export interface MajorForm extends CatalogForm {
 
 export interface SubjectForm extends CatalogForm {
   majorId?: string;
+  credit?: string;
 }
 
 export interface AssignRoleForm {
+  facultyId?: string;
   roleId?: string;
 }
 
 export interface RejectDocumentForm {
-  criteria?: string[];
+  criteria?: string | string[];
   note?: string;
 }
 
-export interface RoleForm {
-  name?: string;
-  permissionIds?: string[];
+export interface RoleForm extends CatalogForm {
+  permissionIds?: string | string[];
 }
 
-export interface PermissionForm {
-  name?: string;
-}
+export type PermissionForm = CatalogForm;
+
+export const listOf = (value?: string | string[]) => [value ?? []].flat();

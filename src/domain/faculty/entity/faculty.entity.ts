@@ -1,3 +1,4 @@
+import { TABLES_NAME } from 'src/constants';
 import {
   Column,
   CreateDateColumn,
@@ -6,7 +7,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { TABLES_NAME } from 'src/constants';
 import { ActiveStatus } from '../../enums';
 import { Majors } from '../../major/entity/major.entity';
 
@@ -15,23 +15,23 @@ export class Faculties {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column({ type: 'varchar', length: 50, unique: true })
   code: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 200 })
   name: string;
 
   @Column({ type: 'varchar', length: 500, nullable: true })
   description?: string | null;
 
-  @Column({ type: 'varchar', default: ActiveStatus.ACTIVE })
+  @Column({ type: 'varchar', length: 20, default: ActiveStatus.ACTIVE })
   status: ActiveStatus;
 
   @CreateDateColumn()
-  createdAt: Date;
+  dateCreated: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  dateModified: Date;
 
   @OneToMany(() => Majors, (major) => major.faculty)
   majors: Majors[];

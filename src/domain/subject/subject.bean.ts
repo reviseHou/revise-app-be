@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ActiveStatus } from '../enums';
-import { CatalogForm, SubjectForm } from '../forms';
+import { SubjectForm } from '../forms';
 import { MajorBean } from '../major/major.bean';
 import { PAGE_SIZE, likeOf, offsetOf } from '../paging';
 import { Subjects } from './entity/subject.entity';
@@ -19,25 +19,18 @@ export class SubjectBean {
     private readonly majorBean: MajorBean,
   ) {}
 
-  count() {
-    return this.subjectRepository.count();
-  }
-
   async search(keyword: string, facultyId: number | undefined, page: number) {
     const query = this.subjectRepository
       .createQueryBuilder('subject')
       .leftJoinAndSelect('subject.major', 'major')
       .leftJoinAndSelect('major.faculty', 'faculty')
-      .orderBy('subject.title', 'ASC')
+      .orderBy('subject.name', 'ASC')
       .skip(offsetOf(page))
       .take(PAGE_SIZE);
     if (keyword) {
-      query.andWhere(
-        '(subject.title ILIKE :like OR subject.code ILIKE :like)',
-        {
-          like: likeOf(keyword),
-        },
-      );
+      query.andWhere('(subject.name ILIKE :like OR subject.code ILIKE :like)', {
+        like: likeOf(keyword),
+      });
     }
     if (facultyId) query.andWhere('faculty.id = :facultyId', { facultyId });
     const [subjects, total] = await query.getManyAndCount();
@@ -48,9 +41,10 @@ export class SubjectBean {
     const rows = await this.subjectRepository
       .createQueryBuilder('subject')
       .innerJoin('subject.major', 'major')
-      .select('major.facultyId', 'facultyId')
+      .innerJoin('major.faculty', 'faculty')
+      .select('faculty.id', 'facultyId')
       .addSelect('COUNT(subject.id)', 'count')
-      .groupBy('major.facultyId')
+      .groupBy('faculty.id')
       .getRawMany<{ facultyId: number; count: string }>();
     return new Map(rows.map((row) => [row.facultyId, Number(row.count)]));
   }
@@ -66,16 +60,15 @@ export class SubjectBean {
 
   async create(form: SubjectForm) {
     const major = await this.majorBean.findById(Number(form.majorId));
-    const { title, code, description } = await this.readValidForm(form);
+    const fields = await this.readValidForm(form);
     return this.subjectRepository.save(
-      this.subjectRepository.create({ title, code, description, major }),
+      this.subjectRepository.create({ ...fields, major }),
     );
   }
 
   async update(id: number, form: SubjectForm) {
     const subject = await this.findById(id);
-    const { title, code, description } = await this.readValidForm(form, id);
-    Object.assign(subject, { title, code, description });
+    Object.assign(subject, await this.readValidForm(form, id));
     if (form.majorId) {
       subject.major = await this.majorBean.findById(Number(form.majorId));
     }
@@ -99,19 +92,30 @@ export class SubjectBean {
     if (!subject) throw new NotFoundException('Không tìm thấy môn học');
     if (subject.documents.length) {
       throw new BadRequestException(
-        `Môn ${subject.title} còn ${subject.documents.length} tài liệu, không thể xóa. Hãy ẩn môn học thay vì xóa`,
+        `Môn ${subject.name} còn ${subject.documents.length} tài liệu, không thể xóa. Hãy ẩn môn học thay vì xóa`,
       );
     }
     await this.subjectRepository.remove(subject);
     return subject;
   }
 
-  private async readValidForm(form: CatalogForm, ownId?: number) {
-    const title = (form.name ?? '').trim();
-    const code = (form.code ?? '').trim().toUpperCase() || null;
-    if (!title) throw new BadRequestException('Cần nhập tên môn học');
-    if (code) await this.assertCodeNotUsed(code, ownId);
-    return { title, code, description: form.description?.trim() ?? '' };
+  private async readValidForm(form: SubjectForm, ownId?: number) {
+    const name = (form.name ?? '').trim();
+    const code = (form.code ?? '').trim().toUpperCase();
+    if (!name) throw new BadRequestException('Cần nhập tên môn học');
+    if (!code) throw new BadRequestException('Cần nhập mã môn học');
+    await this.assertCodeNotUsed(code, ownId);
+    const creditText = (form.credit ?? '').trim();
+    const credit = creditText ? Number(creditText) : null;
+    if (credit !== null && (!Number.isInteger(credit) || credit < 0)) {
+      throw new BadRequestException('Số tín chỉ không hợp lệ');
+    }
+    return {
+      name,
+      code,
+      credit,
+      description: form.description?.trim() || null,
+    };
   }
 
   private async assertCodeNotUsed(code: string, ownId?: number) {

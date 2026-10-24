@@ -17,9 +17,9 @@
         <tr>
             <td>{{add (multiply (add @root.page -1) @root.pageSize) (add @index 1)}}</td>
             <td><a href="/cms/documents/{{id}}">{{title}}</a></td>
-            <td>{{#if subject.major}}{{subject.major.faculty.code}} › {{subject.major.code}} › {{/if}}{{subject.title}}{{#unless subject.major}} <span class="text-muted">(môn chưa thuộc ngành)</span>{{/unless}}</td>
-            <td>{{author.username}}<div class="text-muted small">{{author.email}}</div></td>
-            <td>{{moment createdAt "DD/MM/YYYY HH:mm"}}</td>
+            <td>{{#if subject.major}}{{subject.major.faculty.code}} › {{subject.major.code}} › {{/if}}{{subject.name}}{{#unless subject.major}} <span class="text-muted">(môn chưa thuộc ngành)</span>{{/unless}}</td>
+            <td>{{uploader.fullName}}<div class="text-muted small">{{uploader.email}}</div></td>
+            <td>{{moment dateCreated "DD/MM/YYYY HH:mm"}}</td>
             <td>{{> status_badge status=status}}</td>
         </tr>
         {{else}}

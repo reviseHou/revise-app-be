@@ -19,10 +19,6 @@ export class MajorBean {
     private readonly facultyBean: FacultyBean,
   ) {}
 
-  count() {
-    return this.majorRepository.count();
-  }
-
   async search(keyword: string, page: number) {
     const query = this.majorRepository
       .createQueryBuilder('major')
@@ -44,29 +40,6 @@ export class MajorBean {
       relations: ['faculty'],
       order: { code: 'ASC' },
     });
-  }
-
-  async findByFacultyWithSubjectCount(facultyId: number) {
-    const result = await this.majorRepository
-      .createQueryBuilder('major')
-      .leftJoin('major.subjects', 'subject')
-      .where('major.facultyId = :facultyId', { facultyId })
-      .select([
-        'major.id',
-        'major.code',
-        'major.name',
-        'major.description',
-        'major.status',
-      ])
-      .addSelect('COUNT(subject.id)', 'subjectCount')
-      .groupBy('major.id')
-      .orderBy('major.code', 'ASC')
-      .getRawAndEntities();
-    const rows = result.raw as { subjectCount: string }[];
-    return result.entities.map((major, index) => ({
-      ...major,
-      subjectCount: Number(rows[index].subjectCount),
-    }));
   }
 
   async findById(id: number) {

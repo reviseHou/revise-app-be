@@ -3,45 +3,48 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
-import { Roles } from '../../role/entity/role.entity';
 import { Documents } from '../../document/entity/document.entity';
+import { ActiveStatus } from '../../enums';
+import { Faculties } from '../../faculty/entity/faculty.entity';
+import { Roles } from '../../role/entity/role.entity';
 
 @Entity(TABLES_NAME.USERS)
 export class Users {
-  @PrimaryGeneratedColumn()
-  @ApiProperty()
-  id: number;
+  @PrimaryColumn({ type: 'varchar', length: 255 })
+  id: string;
 
-  @ApiProperty()
-  @Column()
-  username: string;
-
-  @Column()
-  @ApiProperty()
+  @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
 
-  @Column({ nullable: true })
-  @ApiProperty()
-  avatarUrl?: string;
+  @Column({ type: 'varchar', length: 200, nullable: true })
+  avatar?: string | null;
 
-  @CreateDateColumn()
-  @ApiProperty()
-  createdAt: Date;
+  @Column({ type: 'varchar', length: 200 })
+  fullName: string;
 
-  @CreateDateColumn()
-  @ApiProperty()
-  updateAt: Date;
-
-  @ApiProperty()
-  @ManyToOne(() => Roles, (role) => role.users)
+  @ManyToOne(() => Roles, (role) => role.users, { nullable: false })
+  @JoinColumn({ name: 'role_id' })
   role: Roles;
 
-  @ApiProperty()
-  @OneToMany(() => Documents, (document) => document.author)
+  @ManyToOne(() => Faculties, { nullable: true })
+  @JoinColumn({ name: 'faculty_id' })
+  faculty?: Faculties | null;
+
+  @Column({ type: 'varchar', length: 20, default: ActiveStatus.ACTIVE })
+  status: ActiveStatus;
+
+  @CreateDateColumn()
+  dateCreated: Date;
+
+  @UpdateDateColumn()
+  dateModified: Date;
+
+  @OneToMany(() => Documents, (document) => document.uploader)
   documents: Documents[];
 }

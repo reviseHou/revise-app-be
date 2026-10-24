@@ -6,13 +6,19 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DocumentStatus } from '../enums';
+import {
+  FacultyScope,
+  applyFacultyScope,
+  assertInFacultyScope,
+  facultyScopeOf,
+} from '../faculty-scope';
 import { REVIEW_CRITERIA } from './document.criteria';
-import { RejectDocumentForm } from '../forms';
+import { RejectDocumentForm, listOf } from '../forms';
 import { Users } from '../user/entity/user.entity';
 import { PAGE_SIZE, likeOf, offsetOf } from '../paging';
 import { Documents } from './entity/document.entity';
 
-export interface NameCount {
+interface NameCount {
   name: string;
   count: number;
 }
@@ -29,9 +35,17 @@ export class DocumentBean {
     private readonly documentRepository: Repository<Documents>,
   ) {}
 
-  async countByStatus() {
-    const rows = await this.documentRepository
-      .createQueryBuilder('document')
+  private scoped(scope: FacultyScope) {
+    const query = this.documentRepository.createQueryBuilder('document');
+    if (scope === null) return query;
+    query
+      .innerJoin('document.subject', 'scopeSubject')
+      .innerJoin('scopeSubject.major', 'scopeMajor');
+    return applyFacultyScope(query, scope, '"scopeMajor"."faculty_id"');
+  }
+
+  async countByStatus(scope: FacultyScope) {
+    const rows = await this.scoped(scope)
       .select('document.status', 'status')
       .addSelect('COUNT(document.id)', 'count')
       .groupBy('document.status')
@@ -44,9 +58,8 @@ export class DocumentBean {
     return countByStatus;
   }
 
-  async countByFaculty() {
-    const rows = await this.documentRepository
-      .createQueryBuilder('document')
+  async countByFaculty(scope: FacultyScope) {
+    const rows = await this.scoped(scope)
       .leftJoin('document.subject', 'subject')
       .leftJoin('subject.major', 'major')
       .leftJoin('major.faculty', 'faculty')
@@ -58,11 +71,10 @@ export class DocumentBean {
     return toNameCounts(rows);
   }
 
-  async countByMonthSince(since: Date) {
-    const month = "to_char(document.createdAt, 'YYYY-MM')";
-    const rows = await this.documentRepository
-      .createQueryBuilder('document')
-      .where('document.createdAt >= :since', { since })
+  async countByMonthSince(since: Date, scope: FacultyScope) {
+    const month = "to_char(document.dateCreated, 'YYYY-MM')";
+    const rows = await this.scoped(scope)
+      .andWhere('document.dateCreated >= :since', { since })
       .select(month, 'name')
       .addSelect('COUNT(document.id)', 'count')
       .groupBy(month)
@@ -71,15 +83,14 @@ export class DocumentBean {
     return toNameCounts(rows);
   }
 
-  async findTopUploaders(limit: number) {
-    const rows = await this.documentRepository
-      .createQueryBuilder('document')
-      .innerJoin('document.author', 'author')
-      .where('document.status = :status', { status: DocumentStatus.ACTIVE })
-      .select('author.username', 'name')
+  async findTopUploaders(limit: number, scope: FacultyScope) {
+    const rows = await this.scoped(scope)
+      .innerJoin('document.uploader', 'uploader')
+      .andWhere('document.status = :status', { status: DocumentStatus.ACTIVE })
+      .select('uploader.fullName', 'name')
       .addSelect('COUNT(document.id)', 'count')
-      .groupBy('author.id')
-      .addGroupBy('author.username')
+      .groupBy('uploader.id')
+      .addGroupBy('uploader.fullName')
       .orderBy('COUNT(document.id)', 'DESC')
       .limit(limit)
       .getRawMany<RawNameCount>();
@@ -90,17 +101,19 @@ export class DocumentBean {
     keyword: string,
     status: DocumentStatus | undefined,
     page: number,
+    scope: FacultyScope,
   ) {
     const oldestFirst = status === DocumentStatus.PENDING;
     const query = this.documentRepository
       .createQueryBuilder('document')
-      .leftJoinAndSelect('document.author', 'author')
+      .leftJoinAndSelect('document.uploader', 'uploader')
       .leftJoinAndSelect('document.subject', 'subject')
       .leftJoinAndSelect('subject.major', 'major')
       .leftJoinAndSelect('major.faculty', 'faculty')
-      .orderBy('document.createdAt', oldestFirst ? 'ASC' : 'DESC')
+      .orderBy('document.dateCreated', oldestFirst ? 'ASC' : 'DESC')
       .skip(offsetOf(page))
       .take(PAGE_SIZE);
+    applyFacultyScope(query, scope, 'faculty.id');
     if (status) query.andWhere('document.status = :status', { status });
     if (keyword) {
       query.andWhere('document.title ILIKE :like', { like: likeOf(keyword) });
@@ -109,11 +122,11 @@ export class DocumentBean {
     return { documents, total };
   }
 
-  async findById(id: number) {
+  async findById(id: number, scope: FacultyScope) {
     const document = await this.documentRepository.findOne({
-      where: { id },
+      where: { id: String(id) },
       relations: [
-        'author',
+        'uploader',
         'subject',
         'subject.major',
         'subject.major.faculty',
@@ -121,6 +134,7 @@ export class DocumentBean {
       ],
     });
     if (!document) throw new NotFoundException('Không tìm thấy tài liệu');
+    assertInFacultyScope(scope, document.subject?.major?.faculty?.id);
     return document;
   }
 
@@ -155,7 +169,7 @@ export class DocumentBean {
 
   private buildRejectReason(form: RejectDocumentForm) {
     const validCodes = REVIEW_CRITERIA.map((criteria) => criteria.code);
-    const codes = (form.criteria ?? []).filter((code) =>
+    const codes = listOf(form.criteria).filter((code) =>
       validCodes.includes(code),
     );
     const note = (form.note ?? '').trim();
@@ -188,11 +202,20 @@ export class DocumentBean {
     requiredStatus: DocumentStatus,
   ) {
     const document = await this.documentRepository.findOne({
-      where: { id },
-      relations: ['author'],
+      where: { id: String(id) },
+      relations: [
+        'uploader',
+        'subject',
+        'subject.major',
+        'subject.major.faculty',
+      ],
     });
     if (!document) throw new NotFoundException('Không tìm thấy tài liệu');
-    if (document.author?.id === reviewer.id) {
+    assertInFacultyScope(
+      facultyScopeOf(reviewer),
+      document.subject?.major?.faculty?.id,
+    );
+    if (document.uploader?.id === reviewer.id) {
       throw new BadRequestException(
         'Không được duyệt tài liệu do chính mình đăng',
       );

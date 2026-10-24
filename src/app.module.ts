@@ -13,6 +13,7 @@ import { CmsModule } from './cms/cms.module';
 import { QuizModule } from './domain/quiz/quiz.module';
 import { CommentModule } from './domain/comment/comment.module';
 import { SavedModule } from './domain/saved/saved.module';
+import { SnakeNamingStrategy } from './database/snake-naming.strategy';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { SavedModule } from './domain/saved/saved.module';
         username: process.env.DB_USERNAME,
         password: process.env.DB_PASSWORD,
         entities: [Users, Permissions, Roles],
+        namingStrategy: new SnakeNamingStrategy(),
         database: process.env.DB_NAME,
         synchronize: true,
         autoLoadEntities: true,

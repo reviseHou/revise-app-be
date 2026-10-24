@@ -1,42 +1,44 @@
+import { TABLES_NAME } from 'src/constants';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { TABLES_NAME } from 'src/constants';
 import { ActiveStatus } from '../../enums';
-import { Subjects } from '../../subject/entity/subject.entity';
 import { Faculties } from '../../faculty/entity/faculty.entity';
+import { Subjects } from '../../subject/entity/subject.entity';
 
 @Entity(TABLES_NAME.MAJORS)
 export class Majors {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @ManyToOne(() => Faculties, (faculty) => faculty.majors, { nullable: false })
+  @JoinColumn({ name: 'faculty_id' })
+  faculty: Faculties;
+
+  @Column({ type: 'varchar', length: 50, unique: true })
   code: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 200 })
   name: string;
 
   @Column({ type: 'varchar', length: 500, nullable: true })
   description?: string | null;
 
-  @Column({ type: 'varchar', default: ActiveStatus.ACTIVE })
+  @Column({ type: 'varchar', length: 20, default: ActiveStatus.ACTIVE })
   status: ActiveStatus;
 
   @CreateDateColumn()
-  createdAt: Date;
+  dateCreated: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
-
-  @ManyToOne(() => Faculties, (faculty) => faculty.majors, { nullable: false })
-  faculty: Faculties;
+  dateModified: Date;
 
   @OneToMany(() => Subjects, (subject) => subject.major)
   subjects: Subjects[];

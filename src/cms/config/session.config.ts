@@ -6,7 +6,7 @@ import { CMS_SESSION_COOKIE } from '../util/cms.auth';
 
 declare module 'express-session' {
   interface SessionData {
-    userId?: number;
+    userId?: string;
     info?: { type: 'success' | 'error'; content: string };
   }
 }

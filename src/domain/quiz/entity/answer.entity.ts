@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -18,6 +19,7 @@ export class Answers {
     nullable: false,
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'question_id' })
   question: Questions;
 
   @Column({ type: 'varchar', length: 500 })
@@ -30,8 +32,8 @@ export class Answers {
   position: number;
 
   @CreateDateColumn()
-  createdAt: Date;
+  dateCreated: Date;
 
   @UpdateDateColumn()
-  updateAt: Date;
+  dateModified: Date;
 }

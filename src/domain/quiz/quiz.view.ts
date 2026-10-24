@@ -3,30 +3,30 @@ import { Answers } from './entity/answer.entity';
 import { Questions } from './entity/question.entity';
 import { Quizzes } from './entity/quiz.entity';
 
-export interface SubjectRef {
+interface SubjectRef {
   id: number;
-  title: string;
-  code?: string | null;
+  name: string;
+  code: string;
 }
 
 export interface QuizSummaryView {
   id: number;
-  title: string;
+  name: string;
   description?: string | null;
-  durationMinutes: number;
-  questionCount: number;
+  estimateMinute: number;
+  totalQuestion: number;
   attemptCount: number;
   subject: SubjectRef;
-  createdAt: Date;
+  dateCreated: Date;
 }
 
 export interface MyQuizView extends QuizSummaryView {
   status: QuizStatus;
   rejectReason?: string | null;
-  updateAt: Date;
+  dateModified: Date;
 }
 
-export interface AnswerView {
+interface AnswerView {
   id: number;
   title: string;
   position: number;
@@ -40,38 +40,36 @@ export interface QuestionView {
   answers: AnswerView[];
 }
 
-export type QuizCounts = { questionCount: number; attemptCount: number };
-
 export const byPosition = <T extends { position: number; id: number }>(
   a: T,
   b: T,
 ) => a.position - b.position || a.id - b.id;
 
-export function toSubjectRef(quiz: Quizzes): SubjectRef {
+function toSubjectRef(quiz: Quizzes): SubjectRef {
   return {
     id: quiz.subject.id,
-    title: quiz.subject.title,
+    name: quiz.subject.name,
     code: quiz.subject.code,
   };
 }
 
 export function toQuizSummary(
   quiz: Quizzes,
-  counts: QuizCounts,
+  attemptCount: number,
 ): QuizSummaryView {
   return {
     id: quiz.id,
-    title: quiz.title,
+    name: quiz.name,
     description: quiz.description,
-    durationMinutes: quiz.durationMinutes,
-    questionCount: counts.questionCount,
-    attemptCount: counts.attemptCount,
+    estimateMinute: quiz.estimateMinute,
+    totalQuestion: quiz.totalQuestion,
+    attemptCount,
     subject: toSubjectRef(quiz),
-    createdAt: quiz.createdAt,
+    dateCreated: quiz.dateCreated,
   };
 }
 
-export function toAnswerView(answer: Answers, revealCorrect: boolean) {
+function toAnswerView(answer: Answers, revealCorrect: boolean) {
   const view: AnswerView = {
     id: answer.id,
     title: answer.title,
@@ -89,7 +87,7 @@ export function toQuestionView(
     id: question.id,
     title: question.title,
     position: question.position,
-    answers: [...(question.answers ?? [])]
+    answers: [...question.answers]
       .sort(byPosition)
       .map((answer) => toAnswerView(answer, revealCorrect)),
   };

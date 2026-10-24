@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   Unique,
@@ -17,6 +18,7 @@ export class SavedItems {
   id: string;
 
   @ManyToOne(() => Users, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
   user: Users;
 
   @Column({ type: 'varchar', length: 20 })
@@ -26,5 +28,5 @@ export class SavedItems {
   sourceId: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  dateCreated: Date;
 }

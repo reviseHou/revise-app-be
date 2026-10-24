@@ -32,8 +32,8 @@ export class DocumentsController {
   }
 
   @Get('/author/:authorId')
-  findByAuthor(@Param('authorId') authorId: number) {
-    return this.documentsService.findByAuthorId(authorId);
+  findByAuthor(@Param('authorId') authorId: string) {
+    return this.documentsService.findByUploaderId(authorId);
   }
 
   @Get('/subject/:subjectId')

@@ -18,42 +18,22 @@ import {
   toAttemptHistory,
   toAttemptView,
 } from './attempt.view';
-import { SaveAnswerDto } from './dto/attempts.dto';
+import {
+  SaveAnswerDto,
+  SaveAnswersDto,
+  SubmitAttemptDto,
+} from './dto/attempts.dto';
 import { Attempts } from './entity/attempt.entity';
 import { UserAnswers } from './entity/user-answer.entity';
 
 const SUBMIT_GRACE_MS = 30_000;
 
-interface AnswerInput {
-  questionId: number;
-  answerId: number | null;
-}
-
-function parseAnswer(input: unknown): AnswerInput {
-  const value = (input ?? {}) as Partial<SaveAnswerDto>;
-  const questionId = Number(value.questionId);
-  const answerId = value.answerId == null ? null : Number(value.answerId);
-  if (!Number.isInteger(questionId) || questionId <= 0) {
-    throw new BadRequestException('questionId không hợp lệ');
-  }
-  if (answerId !== null && (!Number.isInteger(answerId) || answerId <= 0)) {
-    throw new BadRequestException('answerId không hợp lệ');
-  }
-  return { questionId, answerId };
-}
-
-function parseAnswers(body: unknown): AnswerInput[] {
-  const raw = (body ?? {}) as { answers?: unknown };
-  if (raw.answers === undefined) return [];
-  if (!Array.isArray(raw.answers)) {
-    throw new BadRequestException('answers phải là mảng');
-  }
-  const inputs = raw.answers.map(parseAnswer);
-  const ids = new Set(inputs.map((input) => input.questionId));
-  if (ids.size !== inputs.length) {
+function assertUniqueQuestions(answers: SaveAnswerDto[]) {
+  const ids = new Set(answers.map((answer) => answer.questionId));
+  if (ids.size !== answers.length) {
     throw new BadRequestException('Mỗi câu hỏi chỉ được gửi một lần');
   }
-  return inputs;
+  return answers;
 }
 
 function scoreOf(totalCorrect: number, totalQuestion: number) {
@@ -74,7 +54,7 @@ export class AttemptsService {
 
   async start(user: Users, quizId: number): Promise<AttemptView> {
     const quiz = await this.quizzesService.summary(quizId);
-    if (quiz.questionCount === 0) {
+    if (quiz.totalQuestion === 0) {
       throw new BadRequestException('Bài kiểm tra chưa có câu hỏi');
     }
 
@@ -95,11 +75,8 @@ export class AttemptsService {
     return this.view(attempt, quiz);
   }
 
-  async saveAnswers(user: Users, attemptId: number, body: unknown) {
-    if (!Array.isArray((body as { answers?: unknown } | null)?.answers)) {
-      throw new BadRequestException('answers phải là mảng');
-    }
-    const inputs = parseAnswers(body);
+  async saveAnswers(user: Users, attemptId: number, body: SaveAnswersDto) {
+    const inputs = assertUniqueQuestions(body.answers);
     const attempt = await this.findOwned(user, attemptId);
     const quiz = await this.quizzesService.summary(attempt.quiz.id);
     this.assertWritable(attempt, quiz);
@@ -114,9 +91,9 @@ export class AttemptsService {
   async submit(
     user: Users,
     attemptId: number,
-    body: unknown,
+    body: SubmitAttemptDto,
   ): Promise<AttemptView> {
-    const answers = parseAnswers(body);
+    const answers = assertUniqueQuestions(body.answers ?? []);
 
     const attempt = await this.findOwned(user, attemptId);
     const quiz = await this.quizzesService.summary(attempt.quiz.id);
@@ -137,7 +114,7 @@ export class AttemptsService {
     return attempts.map(toAttemptHistory);
   }
 
-  private async grade(attempt: Attempts, answers: AnswerInput[]) {
+  private async grade(attempt: Attempts, answers: SaveAnswerDto[]) {
     const questions = await this.quizzesService.findQuestions(attempt.quiz.id);
 
     await this.dataSource.transaction(async (manager) => {
@@ -179,7 +156,7 @@ export class AttemptsService {
     manager: EntityManager,
     attempt: Attempts,
     questions: Questions[],
-    inputs: AnswerInput[],
+    inputs: SaveAnswerDto[],
   ) {
     for (const input of inputs) {
       const question = questions.find((item) => item.id === input.questionId);
@@ -241,7 +218,7 @@ export class AttemptsService {
   private isExpired(attempt: Attempts, quiz: QuizSummaryView) {
     return (
       Date.now() >
-      expiresAtOf(attempt, quiz.durationMinutes).getTime() + SUBMIT_GRACE_MS
+      expiresAtOf(attempt, quiz.estimateMinute).getTime() + SUBMIT_GRACE_MS
     );
   }
 

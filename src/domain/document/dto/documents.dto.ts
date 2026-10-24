@@ -1,50 +1,38 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsString,
-  IsOptional,
-  IsBoolean,
-  IsDate,
-  IsNumber,
-} from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateDocumentDto {
   @ApiProperty()
   @IsString()
   title: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   description?: string;
 
-  @ApiProperty()
-  @IsString()
-  content: string;
-
   @ApiProperty({ required: false })
-  @IsString()
-  @IsOptional()
-  fileUrl?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  attachments?: any;
-
-  @ApiProperty()
   @IsNumber()
-  authorId: number;
+  @IsOptional()
+  year?: number;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  filePath?: string;
+
+  @ApiProperty({ required: false, description: 'PDF | DOCX | PPTX' })
+  @IsString()
+  @IsOptional()
+  mediaType?: string;
+
+  @ApiProperty()
+  @IsString()
+  uploaderId: string;
 
   @ApiProperty()
   @IsNumber()
   subjectId: number;
-
-  @ApiProperty()
-  @IsDate()
-  createdAt: Date;
-
-  @ApiProperty()
-  @IsDate()
-  updateAt: Date;
 }
 
 export class UpdateDocumentDto {
@@ -59,25 +47,22 @@ export class UpdateDocumentDto {
   description?: string;
 
   @ApiProperty({ required: false })
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  content?: string;
+  year?: number;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
-  fileUrl?: string;
+  filePath?: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, description: 'PDF | DOCX | PPTX' })
+  @IsString()
   @IsOptional()
-  attachments?: any;
+  mediaType?: string;
 
   @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
   subjectId?: number;
-
-  @ApiProperty()
-  @IsDate()
-  updateAt: Date;
 }

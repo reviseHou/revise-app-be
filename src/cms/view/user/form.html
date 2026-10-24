@@ -4,7 +4,7 @@
     <div class="card-body">
         <div class="form-group">
             <label for="username">Tên</label>
-            <input type="text" class="form-control" id="username" value="{{account.username}}" disabled>
+            <input type="text" class="form-control" id="username" value="{{account.fullName}}" disabled>
         </div>
         <div class="form-group">
             <label for="email">Email</label>
@@ -13,9 +13,16 @@
         <div class="form-group">
             <label for="roleId">Vai trò</label>
             <select class="form-control" id="roleId" name="roleId">
-                <option value="">(không có vai trò)</option>
-                {{#each roles}}<option value="{{id}}" {{#if (eq id @root.account.role.id)}}selected{{/if}}>{{name}}</option>{{/each}}
+                {{#each roles}}<option value="{{id}}" data-permissions="{{permissionCodes}}" {{#if (eq id @root.account.role.id)}}selected{{/if}}>{{name}}</option>{{/each}}
             </select>
+        </div>
+        <div class="form-group" id="facultyGroup">
+            <label for="facultyId">Khoa phụ trách</label>
+            <select class="form-control" id="facultyId" name="facultyId">
+                <option value="">Tất cả các khoa</option>
+                {{#each faculties}}<option value="{{id}}" {{#if (eq id @root.account.faculty.id)}}selected{{/if}}>{{code}} – {{name}}{{#unless (eq status 'ACTIVE')}} (đã ẩn){{/unless}}</option>{{/each}}
+            </select>
+            <small class="form-text text-muted">Chọn khoa thì chỉ duyệt được tài liệu và bài kiểm tra thuộc khoa đó. Để "Tất cả các khoa" thì duyệt được mọi khoa.</small>
         </div>
     </div>
     <div class="card-footer">

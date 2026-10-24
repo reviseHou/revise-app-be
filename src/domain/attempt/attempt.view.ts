@@ -9,7 +9,7 @@ import { AttemptStatus } from '../enums';
 import { Attempts } from './entity/attempt.entity';
 import { UserAnswers } from './entity/user-answer.entity';
 
-export interface AttemptQuestionView extends QuestionView {
+interface AttemptQuestionView extends QuestionView {
   selectedAnswerId: number | null;
   isCorrect?: boolean;
   explanation?: string | null;
@@ -40,8 +40,8 @@ export interface AttemptHistoryView {
   score?: number | null;
 }
 
-export const expiresAtOf = (attempt: Attempts, durationMinutes: number) =>
-  new Date(attempt.dateStarted.getTime() + durationMinutes * 60_000);
+export const expiresAtOf = (attempt: Attempts, estimateMinute: number) =>
+  new Date(attempt.dateStarted.getTime() + estimateMinute * 60_000);
 
 export function toAttemptView(
   attempt: Attempts,
@@ -80,7 +80,7 @@ export function toAttemptView(
     status: attempt.status,
     dateStarted: attempt.dateStarted,
     dateSubmitted: attempt.dateSubmitted,
-    expiresAt: expiresAtOf(attempt, quiz.durationMinutes),
+    expiresAt: expiresAtOf(attempt, quiz.estimateMinute),
     totalQuestion,
     totalAnswered,
     totalCorrect: submitted ? attempt.totalCorrect : null,

@@ -3,9 +3,9 @@ import { Users } from '../user/entity/user.entity';
 import { Comments } from './entity/comment.entity';
 
 export interface CommentUserView {
-  id: number;
-  username: string;
-  avatarUrl?: string | null;
+  id: string;
+  fullName: string;
+  avatar?: string | null;
 }
 
 export interface CommentView {
@@ -13,8 +13,8 @@ export interface CommentView {
   parentId: number | null;
   content: string | null;
   deleted: boolean;
-  createdAt: Date;
-  updateAt: Date;
+  dateCreated: Date;
+  dateModified: Date;
   user: CommentUserView;
   replyToUser: CommentUserView | null;
   replies?: CommentView[];
@@ -22,8 +22,8 @@ export interface CommentView {
 
 const toUserView = (user: Users): CommentUserView => ({
   id: user.id,
-  username: user.username,
-  avatarUrl: user.avatarUrl,
+  fullName: user.fullName,
+  avatar: user.avatar,
 });
 
 export function toCommentView(comment: Comments): CommentView {
@@ -33,8 +33,8 @@ export function toCommentView(comment: Comments): CommentView {
     parentId: comment.parent ? Number(comment.parent.id) : null,
     content: deleted ? null : comment.content,
     deleted,
-    createdAt: comment.createdAt,
-    updateAt: comment.updateAt,
+    dateCreated: comment.dateCreated,
+    dateModified: comment.dateModified,
     user: toUserView(comment.user),
     replyToUser: comment.replyToUser ? toUserView(comment.replyToUser) : null,
   };

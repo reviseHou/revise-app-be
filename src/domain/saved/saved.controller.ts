@@ -7,11 +7,10 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/domain/auth/decorator/current-user.decorator';
 import { JwtAuthGuard } from 'src/domain/auth/guards/jwt.guard';
 import { Users } from 'src/domain/user/entity/user.entity';
-import { SourceType } from '../enums';
 import { SavedItemDto } from './dto/saved.dto';
 import { SavedService } from './saved.service';
 
@@ -38,13 +37,7 @@ export class SavedController {
   }
 
   @Delete('/')
-  @ApiQuery({ name: 'sourceType', enum: SourceType })
-  @ApiQuery({ name: 'sourceId', type: Number })
-  remove(
-    @CurrentUser() user: Users,
-    @Query('sourceType') sourceType: string,
-    @Query('sourceId') sourceId: string,
-  ) {
-    return this.savedService.remove(user, { sourceType, sourceId });
+  remove(@CurrentUser() user: Users, @Query() query: SavedItemDto) {
+    return this.savedService.remove(user, query);
   }
 }

@@ -1,46 +1,48 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Majors } from '../../major/entity/major.entity';
-import { ActiveStatus } from '../../enums';
 import { TABLES_NAME } from 'src/constants';
-import { Documents } from '../../document/entity/document.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
+import { Documents } from '../../document/entity/document.entity';
+import { ActiveStatus } from '../../enums';
+import { Majors } from '../../major/entity/major.entity';
 
 @Entity(TABLES_NAME.SUBJECTS)
 export class Subjects {
-  @ApiProperty()
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ApiProperty()
-  @Column()
-  title: string;
+  @ManyToOne(() => Majors, (major) => major.subjects, { nullable: false })
+  @JoinColumn({ name: 'major_id' })
+  major: Majors;
 
-  @ApiProperty()
-  @Column({ nullable: true })
-  description: string;
+  @Column({ type: 'varchar', length: 50, unique: true })
+  code: string;
 
-  @ApiProperty({ required: false })
-  @Column({ type: 'varchar', unique: true, nullable: true })
-  code?: string | null;
+  @Column({ type: 'varchar', length: 200 })
+  name: string;
 
-  @ApiProperty()
-  @Column({ type: 'varchar', default: ActiveStatus.ACTIVE })
+  @Column({ type: 'smallint', nullable: true })
+  credit?: number | null;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  description?: string | null;
+
+  @Column({ type: 'varchar', length: 20, default: ActiveStatus.ACTIVE })
   status: ActiveStatus;
 
-  @ApiProperty({ required: false })
-  @ManyToOne(() => Majors, (major) => major.subjects, { nullable: true })
-  major?: Majors | null;
+  @CreateDateColumn()
+  dateCreated: Date;
+
+  @UpdateDateColumn()
+  dateModified: Date;
 
   @OneToMany(() => Documents, (document) => document.subject)
   documents: Documents[];
-
-  @CreateDateColumn()
-  createdAt: Date;
 }

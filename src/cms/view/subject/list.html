@@ -18,13 +18,13 @@
             <tr>
                 <td>{{add (multiply (add @root.page -1) @root.pageSize) (add @index 1)}}</td>
                 <td>{{code}}</td>
-                <td>{{title}}<div class="text-muted small">{{description}}</div></td>
+                <td>{{name}}<div class="text-muted small">{{description}}</div></td>
                 <td>{{#if major}}{{major.faculty.code}} · {{major.code}} – {{major.name}}{{else}}<span class="text-muted">(chưa thuộc ngành)</span>{{/if}}</td>
                 <td>{{> status_badge status=status}}</td>
                 <td class="action-cell">
                     <a href="/cms/subjects/{{id}}/edit" class="btn-icon" title="Chỉnh sửa"><i class="fas fa-pen"></i></a>
-                    <button type="button" class="btn-icon" title="{{#if (eq status 'ACTIVE')}}Ẩn{{else}}Hiện{{/if}}" data-delete-action="/cms/subjects/{{id}}/toggle-status" data-confirm-title="Bạn có chắc chắn muốn {{#if (eq status 'ACTIVE')}}ẩn{{else}}hiện{{/if}} không?" data-delete-name="{{title}}"><i class="fas {{#if (eq status 'ACTIVE')}}fa-eye-slash{{else}}fa-eye{{/if}}"></i></button>
-                    <button type="button" class="btn-icon danger" title="Xóa" data-delete-action="/cms/subjects/{{id}}/delete" data-delete-name="{{title}}"><i class="fas fa-trash"></i></button>
+                    <button type="button" class="btn-icon" title="{{#if (eq status 'ACTIVE')}}Ẩn{{else}}Hiện{{/if}}" data-delete-action="/cms/subjects/{{id}}/toggle-status" data-confirm-title="Bạn có chắc chắn muốn {{#if (eq status 'ACTIVE')}}ẩn{{else}}hiện{{/if}} không?" data-delete-name="{{name}}"><i class="fas {{#if (eq status 'ACTIVE')}}fa-eye-slash{{else}}fa-eye{{/if}}"></i></button>
+                    <button type="button" class="btn-icon danger" title="Xóa" data-delete-action="/cms/subjects/{{id}}/delete" data-delete-name="{{name}}"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>
             {{/each}}

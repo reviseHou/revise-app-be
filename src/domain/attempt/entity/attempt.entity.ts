@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -24,9 +25,11 @@ export class Attempts {
   id: string;
 
   @ManyToOne(() => Quizzes, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'quiz_id' })
   quiz: Quizzes;
 
   @ManyToOne(() => Users, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
   user: Users;
 
   @Column({ type: 'varchar', length: 20, default: AttemptStatus.IN_PROGRESS })
@@ -54,8 +57,8 @@ export class Attempts {
   userAnswers: UserAnswers[];
 
   @CreateDateColumn()
-  createdAt: Date;
+  dateCreated: Date;
 
   @UpdateDateColumn()
-  updateAt: Date;
+  dateModified: Date;
 }

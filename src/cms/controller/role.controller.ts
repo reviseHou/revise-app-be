@@ -70,12 +70,12 @@ export class RoleController {
     to: LIST,
     onError: `${LIST}/:id/edit`,
   })
-  async renameRole(
+  async updateRole(
     @Param('id', ParseIntPipe) id: number,
     @Body() form: RoleForm,
   ) {
-    const role = await this.roleBean.rename(id, form);
-    return `Đã đổi tên vai trò thành ${role.name}`;
+    const role = await this.roleBean.update(id, form);
+    return `Đã cập nhật vai trò ${role.name}`;
   }
 
   @Post(':id/permissions')

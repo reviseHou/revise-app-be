@@ -16,10 +16,10 @@
         {{#each quizzes}}
         <tr>
             <td>{{add (multiply (add @root.page -1) @root.pageSize) (add @index 1)}}</td>
-            <td><a href="/cms/quizzes/{{id}}">{{title}}</a><div class="text-muted small">{{durationMinutes}} phút</div></td>
-            <td>{{#if subject.major}}{{subject.major.faculty.code}} › {{subject.major.code}} › {{/if}}{{subject.title}}</td>
-            <td>{{questionCount}}</td>
-            <td>{{#if createdBy}}{{createdBy.username}}<div class="text-muted small">{{createdBy.email}}</div>{{else}}<span class="text-muted">(hệ thống)</span>{{/if}}</td>
+            <td><a href="/cms/quizzes/{{id}}">{{name}}</a><div class="text-muted small">{{estimateMinute}} phút</div></td>
+            <td>{{#if subject.major}}{{subject.major.faculty.code}} › {{subject.major.code}} › {{/if}}{{subject.name}}</td>
+            <td>{{totalQuestion}}</td>
+            <td>{{#if createdBy}}{{createdBy.fullName}}<div class="text-muted small">{{createdBy.email}}</div>{{else}}<span class="text-muted">(hệ thống)</span>{{/if}}</td>
             <td>{{moment updateAt "DD/MM/YYYY HH:mm"}}</td>
             <td>{{> status_badge status=status}}</td>
         </tr>

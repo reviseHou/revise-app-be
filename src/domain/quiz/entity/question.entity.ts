@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -21,6 +22,7 @@ export class Questions {
     nullable: false,
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'quiz_id' })
   quiz: Quizzes;
 
   @Column({ type: 'varchar', length: 1000 })
@@ -38,12 +40,12 @@ export class Questions {
   @Column({ type: 'varchar', length: 20, default: ActiveStatus.ACTIVE })
   status: ActiveStatus;
 
-  @OneToMany(() => Answers, (answer) => answer.question)
-  answers: Answers[];
-
   @CreateDateColumn()
-  createdAt: Date;
+  dateCreated: Date;
 
   @UpdateDateColumn()
-  updateAt: Date;
+  dateModified: Date;
+
+  @OneToMany(() => Answers, (answer) => answer.question)
+  answers: Answers[];
 }

@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   Unique,
@@ -22,12 +23,15 @@ export class UserAnswers {
     nullable: false,
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'attempt_id' })
   attempt: Attempts;
 
   @ManyToOne(() => Questions, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'question_id' })
   question: Questions;
 
   @ManyToOne(() => Answers, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'answer_id' })
   answer?: Answers | null;
 
   @Column({ type: 'boolean', nullable: true })
@@ -37,8 +41,8 @@ export class UserAnswers {
   dateAnswered?: Date | null;
 
   @CreateDateColumn()
-  createdAt: Date;
+  dateCreated: Date;
 
   @UpdateDateColumn()
-  updateAt: Date;
+  dateModified: Date;
 }

@@ -9,6 +9,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { QuizStatus } from 'src/domain/enums';
+import { facultyScopeOf } from 'src/domain/faculty-scope';
 import type { RejectDocumentForm } from 'src/domain/forms';
 import { QuizBean } from 'src/domain/quiz/quiz.bean';
 import { QUIZ_REVIEW_CRITERIA } from 'src/domain/quiz/quiz.criteria';
@@ -30,7 +31,9 @@ export class QuizController {
     @Query('keyword') keywordParam: string | undefined,
     @Query('status') statusParam: string | undefined,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) pageParam: number,
+    @Req() request: CmsRequest,
   ) {
+    const scope = facultyScopeOf(request.user);
     const keyword = (keywordParam ?? '').trim();
     const page = Math.max(1, pageParam);
     const status =
@@ -42,8 +45,9 @@ export class QuizController {
       keyword,
       status,
       page,
+      scope,
     );
-    const countByStatus = await this.quizBean.countByStatus();
+    const countByStatus = await this.quizBean.countByStatus(scope);
     return {
       status: status ?? ALL_STATUS,
       keyword,
@@ -57,8 +61,14 @@ export class QuizController {
 
   @Get(':id')
   @CmsView(CmsPermission.READ_QUIZ, 'quiz/detail')
-  async showQuiz(@Param('id', ParseIntPipe) id: number) {
-    const { quiz, questions } = await this.quizBean.findById(id);
+  async showQuiz(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() request: CmsRequest,
+  ) {
+    const { quiz, questions } = await this.quizBean.findById(
+      id,
+      facultyScopeOf(request.user),
+    );
     return { quiz, questions, criteria: QUIZ_REVIEW_CRITERIA };
   }
 
@@ -69,7 +79,7 @@ export class QuizController {
     @Req() request: CmsRequest,
   ) {
     const quiz = await this.quizBean.approve(id, request.user);
-    return `Đã duyệt bài kiểm tra ${quiz.title}`;
+    return `Đã duyệt bài kiểm tra ${quiz.name}`;
   }
 
   @Post(':id/reject')
@@ -80,7 +90,7 @@ export class QuizController {
     @Req() request: CmsRequest,
   ) {
     const quiz = await this.quizBean.reject(id, request.user, form);
-    return `Đã từ chối bài kiểm tra ${quiz.title}`;
+    return `Đã từ chối bài kiểm tra ${quiz.name}`;
   }
 
   @Post(':id/hide')
@@ -90,7 +100,7 @@ export class QuizController {
     @Req() request: CmsRequest,
   ) {
     const quiz = await this.quizBean.hide(id, request.user);
-    return `Đã ẩn bài kiểm tra ${quiz.title}`;
+    return `Đã ẩn bài kiểm tra ${quiz.name}`;
   }
 
   @Post(':id/show')
@@ -100,6 +110,6 @@ export class QuizController {
     @Req() request: CmsRequest,
   ) {
     const quiz = await this.quizBean.show(id, request.user);
-    return `Đã hiện lại bài kiểm tra ${quiz.title}`;
+    return `Đã hiện lại bài kiểm tra ${quiz.name}`;
   }
 }

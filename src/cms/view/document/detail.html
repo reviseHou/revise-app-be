@@ -10,11 +10,11 @@
             <div class="card-body">
                 <dl class="row">
                     <dt class="col-sm-3">Môn học</dt>
-                    <dd class="col-sm-9">{{#if document.subject.major}}{{document.subject.major.faculty.code}} › {{document.subject.major.code}} › {{/if}}{{document.subject.title}}{{#unless document.subject.major}} <span class="text-muted">(môn chưa thuộc ngành)</span>{{/unless}}</dd>
+                    <dd class="col-sm-9">{{#if document.subject.major}}{{document.subject.major.faculty.code}} › {{document.subject.major.code}} › {{/if}}{{document.subject.name}}{{#unless document.subject.major}} <span class="text-muted">(môn chưa thuộc ngành)</span>{{/unless}}</dd>
                     <dt class="col-sm-3">Người đăng</dt>
-                    <dd class="col-sm-9">{{document.author.username}} <span class="text-muted">({{document.author.email}})</span></dd>
+                    <dd class="col-sm-9">{{document.uploader.fullName}} <span class="text-muted">({{document.uploader.email}})</span></dd>
                     <dt class="col-sm-3">Ngày đăng</dt>
-                    <dd class="col-sm-9">{{moment document.createdAt "DD/MM/YYYY HH:mm:ss"}}</dd>
+                    <dd class="col-sm-9">{{moment document.dateCreated "DD/MM/YYYY HH:mm:ss"}}</dd>
                     <dt class="col-sm-3">Mô tả</dt>
                     <dd class="col-sm-9">{{#if document.description}}{{document.description}}{{else}}<span class="text-muted">(trống)</span>{{/if}}</dd>
                     {{#if document.rejectReason}}
@@ -23,19 +23,19 @@
                     {{/if}}
                     {{#if document.reviewedBy}}
                     <dt class="col-sm-3">Xử lý gần nhất</dt>
-                    <dd class="col-sm-9">{{document.reviewedBy.username}} lúc {{moment document.dateReviewed "DD/MM/YYYY HH:mm:ss"}}</dd>
+                    <dd class="col-sm-9">{{document.reviewedBy.fullName}} lúc {{moment document.dateReviewed "DD/MM/YYYY HH:mm:ss"}}</dd>
                     {{/if}}
+                    <dt class="col-sm-3">Năm</dt>
+                    <dd class="col-sm-9">{{#if document.year}}{{document.year}}{{else}}<span class="text-muted">(trống)</span>{{/if}}</dd>
                     <dt class="col-sm-3">Tệp</dt>
-                    <dd class="col-sm-9">{{#if document.fileUrl}}<a href="{{document.fileUrl}}" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt"></i> Mở tệp đính kèm</a>{{else}}<span class="text-muted">Không có tệp đính kèm</span>{{/if}}</dd>
+                    <dd class="col-sm-9">{{#if document.filePath}}<a href="{{document.filePath}}" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt"></i> Mở tệp đính kèm</a>{{#if document.mediaType}} <span class="text-muted">({{document.mediaType}})</span>{{/if}}{{else}}<span class="text-muted">Không có tệp đính kèm</span>{{/if}}</dd>
                 </dl>
-                <h6>Nội dung</h6>
-                <pre class="document-content">{{document.content}}</pre>
             </div>
         </div>
     </div>
 
     <div class="col-lg-4">
-        {{#if (eq document.author.id user.id)}}
+        {{#if (eq document.uploader.id user.id)}}
         <div class="callout callout-warning">Đây là tài liệu do chính bạn đăng nên bạn không thể duyệt.</div>
         {{else}}
             {{#if (eq document.status 'PENDING')}}

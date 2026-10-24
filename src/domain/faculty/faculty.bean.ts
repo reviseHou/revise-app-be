@@ -17,10 +17,6 @@ export class FacultyBean {
     private readonly facultyRepository: Repository<Faculties>,
   ) {}
 
-  count() {
-    return this.facultyRepository.count();
-  }
-
   async search(keyword: string, page: number) {
     const query = this.facultyRepository
       .createQueryBuilder('faculty')

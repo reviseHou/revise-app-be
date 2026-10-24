@@ -15,18 +15,21 @@ export class PermissionBean {
   async search(keyword: string, page: number) {
     const query = this.permissionRepository
       .createQueryBuilder('permission')
-      .orderBy('permission.name', 'ASC')
+      .orderBy('permission.code', 'ASC')
       .skip(offsetOf(page))
       .take(PAGE_SIZE);
     if (keyword) {
-      query.where('permission.name ILIKE :like', { like: likeOf(keyword) });
+      query.where(
+        '(permission.code ILIKE :like OR permission.name ILIKE :like)',
+        { like: likeOf(keyword) },
+      );
     }
     const [permissions, total] = await query.getManyAndCount();
     return { permissions, total };
   }
 
   findAll() {
-    return this.permissionRepository.find({ order: { name: 'ASC' } });
+    return this.permissionRepository.find({ order: { code: 'ASC' } });
   }
 
   async findByIds(ids: number[]) {
@@ -35,17 +38,16 @@ export class PermissionBean {
   }
 
   async create(form: PermissionForm) {
+    const code = (form.code ?? '').trim().toUpperCase();
     const name = (form.name ?? '').trim();
+    const description = (form.description ?? '').trim() || null;
+    if (!code) throw new BadRequestException('Cần nhập mã quyền');
     if (!name) throw new BadRequestException('Cần nhập tên quyền');
-    await this.assertNameNotUsed(name);
-    return this.permissionRepository.save(
-      this.permissionRepository.create({ name }),
-    );
-  }
-
-  private async assertNameNotUsed(name: string) {
-    if (await this.permissionRepository.existsBy({ name })) {
-      throw new BadRequestException(`Quyền ${name} đã tồn tại`);
+    if (await this.permissionRepository.existsBy({ code })) {
+      throw new BadRequestException(`Quyền ${code} đã tồn tại`);
     }
+    return this.permissionRepository.save(
+      this.permissionRepository.create({ code, name, description }),
+    );
   }
 }

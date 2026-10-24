@@ -1,70 +1,63 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { DocumentStatus } from '../../enums';
 import { TABLES_NAME } from 'src/constants';
-import { Subjects } from '../../subject/entity/subject.entity';
-import { Users } from '../../user/entity/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
+import { DocumentStatus } from '../../enums';
+import { Subjects } from '../../subject/entity/subject.entity';
+import { Users } from '../../user/entity/user.entity';
 
 @Entity(TABLES_NAME.DOCUMENTS)
 export class Documents {
-  @PrimaryGeneratedColumn()
-  @ApiProperty()
-  id: number;
+  @PrimaryGeneratedColumn({ type: 'bigint' })
+  id: string;
 
-  @Column()
-  @ApiProperty()
+  @ManyToOne(() => Subjects, (subject) => subject.documents, {
+    nullable: false,
+  })
+  @JoinColumn({ name: 'subject_id' })
+  subject: Subjects;
+
+  @ManyToOne(() => Users, (user) => user.documents, { nullable: false })
+  @JoinColumn({ name: 'uploader_id' })
+  uploader: Users;
+
+  @Column({ type: 'varchar', length: 255 })
   title: string;
 
-  @Column({ nullable: true })
-  @ApiProperty()
-  description: string;
+  @Column({ type: 'varchar', length: 2000, nullable: true })
+  description?: string | null;
 
-  @Column()
-  @ApiProperty()
-  content: string;
+  @Column({ type: 'smallint', nullable: true })
+  year?: number | null;
 
-  @Column({ type: 'varchar', default: DocumentStatus.PENDING })
-  @ApiProperty()
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  filePath?: string | null;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  mediaType?: string | null;
+
+  @Column({ type: 'varchar', length: 20, default: DocumentStatus.PENDING })
   status: DocumentStatus;
 
   @Column({ type: 'varchar', length: 1000, nullable: true })
-  @ApiProperty({ required: false })
   rejectReason?: string | null;
 
   @ManyToOne(() => Users, { nullable: true })
+  @JoinColumn({ name: 'reviewed_by' })
   reviewedBy?: Users | null;
 
   @Column({ type: 'timestamp', nullable: true })
-  @ApiProperty({ required: false })
   dateReviewed?: Date | null;
 
-  @Column({ nullable: true })
-  @ApiProperty({ required: false })
-  fileUrl?: string;
-
-  @Column({ type: 'json', nullable: true })
-  @ApiProperty({ required: false })
-  attachments?: any;
-
   @CreateDateColumn()
-  @ApiProperty()
-  createdAt: Date;
+  dateCreated: Date;
 
-  @CreateDateColumn()
-  @ApiProperty()
-  updateAt: Date;
-
-  @ApiProperty()
-  @ManyToOne(() => Subjects, (subject) => subject.documents)
-  subject: Subjects;
-
-  @ApiProperty()
-  @ManyToOne(() => Users, (user) => user.documents)
-  author: Users;
+  @UpdateDateColumn()
+  dateModified: Date;
 }

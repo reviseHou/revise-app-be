@@ -1,4 +1,4 @@
-import { Logger, RequestMethod } from '@nestjs/common';
+import { Logger, RequestMethod, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
@@ -7,6 +7,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { setupSession } from './cms/config/session.config';
 import { setupViews } from './cms/config/view.config';
+import { toValidationException } from './domain/validation';
 dotenv.config();
 
 async function bootstrap() {
@@ -14,6 +15,13 @@ async function bootstrap() {
   app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/uploads',
   });
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      exceptionFactory: toValidationException,
+    }),
+  );
   setupSession(app);
   setupViews(app);
   app.setGlobalPrefix('api', {
@@ -24,7 +32,11 @@ async function bootstrap() {
   });
 
   const corsOptions = {
-    origin: ['https://revise-hou.tech', 'http://localhost:5173'],
+    origin: [
+      'https://revise-hou.tech',
+      'http://localhost:5173',
+      ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+    ],
     methods: 'GET,POST,PUT,PATCH,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 200,
@@ -57,4 +69,4 @@ async function bootstrap() {
   await app.listen(port);
   Logger.log(`CMS: http://localhost:${port}/cms`, 'Bootstrap');
 }
-bootstrap();
+void bootstrap();

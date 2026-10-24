@@ -10,11 +10,11 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/domain/auth/decorator/current-user.decorator';
 import { JwtAuthGuard } from 'src/domain/auth/guards/jwt.guard';
 import { Users } from 'src/domain/user/entity/user.entity';
-import { SourceType } from '../enums';
+import { SourceKeyDto } from '../validation';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto, UpdateCommentDto } from './dto/comments.dto';
 
@@ -26,13 +26,8 @@ export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   @Get('/')
-  @ApiQuery({ name: 'sourceType', enum: SourceType })
-  @ApiQuery({ name: 'sourceId', type: Number })
-  list(
-    @Query('sourceType') sourceType: string,
-    @Query('sourceId') sourceId: string,
-  ) {
-    return this.commentsService.list(sourceType, sourceId);
+  list(@Query() query: SourceKeyDto) {
+    return this.commentsService.list(query);
   }
 
   @Post('/')

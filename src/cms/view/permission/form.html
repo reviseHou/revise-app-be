@@ -3,8 +3,16 @@
 <form method="post" action="/cms/permissions" class="card card-primary card-outline">
     <div class="card-body">
         <div class="form-group">
+            <label for="code">Mã quyền</label>
+            <input type="text" class="form-control" id="code" name="code" placeholder="Ví dụ: READ_QUIZ" required>
+        </div>
+        <div class="form-group">
             <label for="name">Tên quyền</label>
-            <input type="text" class="form-control" id="name" name="name" placeholder="Ví dụ: READ_QUIZ" required>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Ví dụ: Xem bài kiểm tra" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Mô tả</label>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
         </div>
     </div>
     <div class="card-footer">

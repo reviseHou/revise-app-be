@@ -10,12 +10,16 @@
             </select>
         </div>
         <div class="form-group">
-            <label for="code">Mã môn (tùy chọn)</label>
-            <input type="text" class="form-control" id="code" name="code" value="{{subject.code}}">
+            <label for="code">Mã môn</label>
+            <input type="text" class="form-control" id="code" name="code" value="{{subject.code}}" required>
         </div>
         <div class="form-group">
             <label for="name">Tên môn học</label>
-            <input type="text" class="form-control" id="name" name="name" value="{{subject.title}}" required>
+            <input type="text" class="form-control" id="name" name="name" value="{{subject.name}}" required>
+        </div>
+        <div class="form-group">
+            <label for="credit">Số tín chỉ</label>
+            <input type="number" min="0" class="form-control" id="credit" name="credit" value="{{subject.credit}}">
         </div>
         <div class="form-group">
             <label for="description">Mô tả</label>

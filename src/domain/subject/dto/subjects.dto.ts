@@ -1,16 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateSubjectDto {
   @ApiProperty()
   @IsString()
-  title: string;
+  name: string;
 
   @ApiProperty()
   @IsString()
-  description?: string;
+  code: string;
 
   @ApiProperty()
-  @IsDate()
-  createdAt: Date;
+  @IsNumber()
+  majorId: number;
+
+  @ApiProperty({ required: false })
+  @IsNumber()
+  @IsOptional()
+  credit?: number;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  description?: string;
 }

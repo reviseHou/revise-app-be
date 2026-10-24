@@ -16,120 +16,15 @@ import { Quizzes } from './entity/quiz.entity';
 import { QuizContext } from './dto/quizzes.dto';
 import { byPosition } from './quiz.view';
 
-const LIMITS = {
-  title: 200,
-  description: 500,
-  minDuration: 1,
-  maxDuration: 180,
-  maxQuestions: 200,
-  question: 1000,
-  explanation: 2000,
-  answer: 500,
-  minAnswers: 2,
-  maxAnswers: 6,
-};
-
-interface QuizInput {
-  title: string;
-  description: string | null;
-  subjectId: number;
-  durationMinutes: number;
-  questions: {
-    title: string;
-    explanation: string | null;
-    answers: { title: string; isCorrect: boolean }[];
-  }[];
-}
-
-const text = (value: unknown) =>
-  typeof value === 'string' ? value.trim() : '';
-
-function requireText(value: unknown, field: string, max: number) {
-  const result = text(value);
-  if (!result) throw new BadRequestException(`${field} không được để trống`);
-  if (result.length > max) {
-    throw new BadRequestException(`${field} tối đa ${max} ký tự`);
-  }
-  return result;
-}
-
-function optionalText(value: unknown, field: string, max: number) {
-  const result = text(value);
-  if (result.length > max) {
-    throw new BadRequestException(`${field} tối đa ${max} ký tự`);
-  }
-  return result || null;
-}
-
-function parseQuiz(body: unknown): QuizInput {
-  const raw = (body ?? {}) as Record<string, unknown>;
-  const subjectId = Number(raw.subjectId);
-  if (!Number.isInteger(subjectId) || subjectId <= 0) {
-    throw new BadRequestException('Vui lòng chọn môn học');
-  }
-  const durationMinutes = Number(raw.durationMinutes);
-  if (
-    !Number.isInteger(durationMinutes) ||
-    durationMinutes < LIMITS.minDuration ||
-    durationMinutes > LIMITS.maxDuration
-  ) {
-    throw new BadRequestException(
-      `Thời gian làm bài phải từ ${LIMITS.minDuration} đến ${LIMITS.maxDuration} phút`,
-    );
-  }
-  if (!Array.isArray(raw.questions) || raw.questions.length === 0) {
-    throw new BadRequestException('Bài kiểm tra cần ít nhất 1 câu hỏi');
-  }
-  if (raw.questions.length > LIMITS.maxQuestions) {
-    throw new BadRequestException(`Tối đa ${LIMITS.maxQuestions} câu hỏi`);
-  }
-
-  const questions = raw.questions.map((item: unknown, index: number) => {
-    const label = `Câu ${index + 1}`;
-    const question = (item ?? {}) as Record<string, unknown>;
-    const answers = Array.isArray(question.answers) ? question.answers : [];
-    if (
-      answers.length < LIMITS.minAnswers ||
-      answers.length > LIMITS.maxAnswers
-    ) {
+function assertOneCorrectAnswer(body: QuizContext) {
+  body.questions.forEach((question, index) => {
+    if (question.answers.filter((answer) => answer.isCorrect).length !== 1) {
       throw new BadRequestException(
-        `${label} cần từ ${LIMITS.minAnswers} đến ${LIMITS.maxAnswers} phương án`,
+        `Câu ${index + 1} phải có đúng 1 đáp án đúng`,
       );
     }
-    const parsedAnswers = answers.map(
-      (answer: unknown, answerIndex: number) => {
-        const value = (answer ?? {}) as Record<string, unknown>;
-        return {
-          title: requireText(
-            value.title,
-            `${label}, phương án ${answerIndex + 1}`,
-            LIMITS.answer,
-          ),
-          isCorrect: value.isCorrect === true,
-        };
-      },
-    );
-    if (parsedAnswers.filter((answer) => answer.isCorrect).length !== 1) {
-      throw new BadRequestException(`${label} phải có đúng 1 đáp án đúng`);
-    }
-    return {
-      title: requireText(question.title, `Nội dung ${label}`, LIMITS.question),
-      explanation: optionalText(
-        question.explanation,
-        `Giải thích ${label}`,
-        LIMITS.explanation,
-      ),
-      answers: parsedAnswers,
-    };
   });
-
-  return {
-    title: requireText(raw.title, 'Tên bài kiểm tra', LIMITS.title),
-    description: optionalText(raw.description, 'Mô tả', LIMITS.description),
-    subjectId,
-    durationMinutes,
-    questions,
-  };
+  return body;
 }
 
 @Injectable()
@@ -142,15 +37,16 @@ export class QuizAuthoringService {
     private readonly subjectsRepository: Repository<Subjects>,
   ) {}
 
-  async create(user: Users, body: unknown) {
-    const input = parseQuiz(body);
+  async create(user: Users, body: QuizContext) {
+    const input = assertOneCorrectAnswer(body);
     await this.assertSubject(input.subjectId);
     const id = await this.dataSource.transaction(async (manager) => {
       const quiz = await manager.save(
         manager.create(Quizzes, {
-          title: input.title,
-          description: input.description,
-          durationMinutes: input.durationMinutes,
+          name: input.name,
+          description: input.description || null,
+          estimateMinute: input.estimateMinute,
+          totalQuestion: input.questions.length,
           status: QuizStatus.PENDING,
           subject: { id: input.subjectId },
           createdBy: { id: user.id },
@@ -170,9 +66,9 @@ export class QuizAuthoringService {
     });
     return {
       id: quiz.id,
-      title: quiz.title,
+      name: quiz.name,
       description: quiz.description,
-      durationMinutes: quiz.durationMinutes,
+      estimateMinute: quiz.estimateMinute,
       status: quiz.status,
       rejectReason: quiz.rejectReason,
       subjectId: quiz.subject.id,
@@ -190,26 +86,27 @@ export class QuizAuthoringService {
     };
   }
 
-  async update(user: Users, id: number, body: unknown) {
+  async update(user: Users, id: number, body: QuizContext) {
     const quiz = await this.findOwned(user, id);
     if ((await this.countAttempts(id)) > 0) {
       throw new ConflictException(
         'Bài kiểm tra đã có người làm nên không sửa được. Hãy tạo bài mới.',
       );
     }
-    const input = parseQuiz(body);
+    const input = assertOneCorrectAnswer(body);
     await this.assertSubject(input.subjectId);
     await this.dataSource.transaction(async (manager) => {
       await manager
         .createQueryBuilder()
         .delete()
         .from(Questions)
-        .where('"quizId" = :quizId', { quizId: quiz.id })
+        .where('quiz_id = :quizId', { quizId: quiz.id })
         .execute();
       await manager.update(Quizzes, quiz.id, {
-        title: input.title,
-        description: input.description,
-        durationMinutes: input.durationMinutes,
+        name: input.name,
+        description: input.description || null,
+        estimateMinute: input.estimateMinute,
+        totalQuestion: input.questions.length,
         subject: { id: input.subjectId },
         status: QuizStatus.PENDING,
         rejectReason: null,
@@ -232,14 +129,14 @@ export class QuizAuthoringService {
   private async saveQuestions(
     manager: EntityManager,
     quizId: number,
-    input: QuizInput,
+    input: QuizContext,
   ) {
     for (const [index, item] of input.questions.entries()) {
       const question = await manager.save(
         manager.create(Questions, {
           quiz: { id: quizId },
           title: item.title,
-          explanation: item.explanation,
+          explanation: item.explanation || null,
           position: index + 1,
         }),
       );
@@ -259,8 +156,8 @@ export class QuizAuthoringService {
   private countAttempts(quizId: number) {
     return this.dataSource
       .createQueryBuilder()
-      .from('attempts', 'attempt')
-      .where('attempt."quizId" = :quizId', { quizId })
+      .from('attempt', 'attempt')
+      .where('attempt.quiz_id = :quizId', { quizId })
       .getCount();
   }
 

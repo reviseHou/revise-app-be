@@ -7,8 +7,8 @@
     <ul class="navbar-nav ml-auto">
         <li class="nav-item dropdown">
             <a class="nav-link d-flex align-items-center" data-toggle="dropdown" href="#" role="button">
-                <span class="user-chip mr-2">{{upcase (truncate user.username 1 "")}}</span>
-                <span class="d-none d-sm-inline mr-1">{{user.username}}</span>
+                <span class="user-chip mr-2">{{upcase (truncate user.fullName 1 "")}}</span>
+                <span class="d-none d-sm-inline mr-1">{{user.fullName}}</span>
                 <i class="fas fa-chevron-down small"></i>
             </a>
             <div class="dropdown-menu dropdown-menu-right">

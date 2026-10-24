@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { SubjectjsService } from './subjectjs.service';
+import { SubjectsService } from './subjects.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateSubjectDto } from './dto/subjects.dto';
 import { JwtAuthGuard } from 'src/domain/auth/guards/jwt.guard';
@@ -9,7 +9,7 @@ import { JwtAuthGuard } from 'src/domain/auth/guards/jwt.guard';
 @UseGuards(JwtAuthGuard)
 @Controller('subjects')
 export class SubjectsController {
-  constructor(private readonly subjectsService: SubjectjsService) {}
+  constructor(private readonly subjectsService: SubjectsService) {}
 
   @Get('/')
   findAll() {
