@@ -1,6 +1,7 @@
 import {
   Body,
   Get,
+  Param,
   Post,
   ParseIntPipe,
   Query,
@@ -46,5 +47,15 @@ export class PermissionController {
   async createPermission(@Body() form: PermissionForm) {
     const permission = await this.permissionBean.create(form);
     return `Đã tạo quyền ${permission.name}`;
+  }
+
+  @Post(':id/delete')
+  @CmsAction(CmsPermission.CREATE_PERMISSION, { to: LIST, onError: LIST })
+  async deletePermission(@Param('id', ParseIntPipe) id: number) {
+    const permission = await this.permissionBean.remove(
+      id,
+      Object.values(CmsPermission),
+    );
+    return `Đã xóa quyền ${permission.name}`;
   }
 }

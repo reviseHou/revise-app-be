@@ -6,12 +6,14 @@ import {
   Post,
   Query,
   DefaultValuePipe,
+  Req,
 } from '@nestjs/common';
 import { FacultyBean } from 'src/domain/faculty/faculty.bean';
 import type { AssignRoleForm } from 'src/domain/forms';
 import { RoleBean } from 'src/domain/role/role.bean';
 import { UserBean } from 'src/domain/user/user.bean';
 import { CmsAction, CmsController, CmsView } from '../cms.decorator';
+import type { CmsRequest } from '../util/cms.helper';
 import { CmsPermission } from '../util/cms.permission';
 
 const LIST = '/cms/users';
@@ -71,5 +73,12 @@ export class UserController {
   async assignRole(@Param('id') id: string, @Body() form: AssignRoleForm) {
     const user = await this.userBean.assignRole(id, form);
     return `Đã cập nhật vai trò và khoa của ${user.fullName}`;
+  }
+
+  @Post(':id/delete')
+  @CmsAction(CmsPermission.ASSIGN_ROLE, { to: LIST, onError: LIST })
+  async deleteUser(@Param('id') id: string, @Req() request: CmsRequest) {
+    const user = await this.userBean.remove(id, request.user);
+    return `Đã xóa người dùng ${user.fullName}`;
   }
 }

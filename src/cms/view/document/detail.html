@@ -35,9 +35,6 @@
     </div>
 
     <div class="col-lg-4">
-        {{#if (eq document.uploader.id user.id)}}
-        <div class="callout callout-warning">Đây là tài liệu do chính bạn đăng nên bạn không thể duyệt.</div>
-        {{else}}
             {{#if (eq document.status 'PENDING')}}
             <div class="card card-success card-outline">
                 <div class="card-header"><h3 class="card-title">Duyệt</h3></div>
@@ -67,14 +64,13 @@
             {{/if}}
             {{#if (eq document.status 'ACTIVE')}}
             <div class="card"><div class="card-body">
-                <button type="button" class="btn btn-default btn-block" data-delete-action="/cms/documents/{{document.id}}/hide" data-confirm-title="Bạn có chắc chắn muốn ẩn tài liệu này không?" data-delete-name="{{document.title}}"><i class="fas fa-eye-slash"></i> Ẩn tài liệu</button>
+                <button type="button" class="btn btn-default btn-block" data-delete-action="/cms/documents/{{document.id}}/hide" data-confirm-title="Bạn có chắc chắn muốn chuyển tài liệu này sang không hoạt động không?" data-delete-name="{{document.title}}"><i class="fas fa-eye-slash"></i> Ngừng hoạt động</button>
             </div></div>
             {{/if}}
             {{#if (eq document.status 'INACTIVE')}}
             <div class="card"><div class="card-body">
-                <button type="button" class="btn btn-primary btn-block" data-delete-action="/cms/documents/{{document.id}}/show" data-confirm-title="Bạn có chắc chắn muốn hiện lại tài liệu này không?" data-delete-name="{{document.title}}"><i class="fas fa-eye"></i> Hiện lại tài liệu</button>
+                <button type="button" class="btn btn-primary btn-block" data-delete-action="/cms/documents/{{document.id}}/show" data-confirm-title="Bạn có chắc chắn muốn kích hoạt lại tài liệu này không?" data-delete-name="{{document.title}}"><i class="fas fa-eye"></i> Kích hoạt lại</button>
             </div></div>
             {{/if}}
-        {{/if}}
     </div>
 </div>

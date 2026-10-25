@@ -9,6 +9,7 @@ import { ActiveStatus } from '../enums';
 import { SubjectForm } from '../forms';
 import { MajorBean } from '../major/major.bean';
 import { PAGE_SIZE, likeOf, offsetOf } from '../paging';
+import { Quizzes } from '../quiz/entity/quiz.entity';
 import { Subjects } from './entity/subject.entity';
 
 @Injectable()
@@ -92,7 +93,15 @@ export class SubjectBean {
     if (!subject) throw new NotFoundException('Không tìm thấy môn học');
     if (subject.documents.length) {
       throw new BadRequestException(
-        `Môn ${subject.name} còn ${subject.documents.length} tài liệu, không thể xóa. Hãy ẩn môn học thay vì xóa`,
+        `Môn ${subject.name} còn ${subject.documents.length} tài liệu, không thể xóa. Hãy chuyển môn học sang không hoạt động thay vì xóa`,
+      );
+    }
+    const quizCount = await this.subjectRepository.manager.count(Quizzes, {
+      where: { subject: { id } },
+    });
+    if (quizCount) {
+      throw new BadRequestException(
+        `Môn ${subject.name} còn ${quizCount} bài kiểm tra, không thể xóa. Hãy chuyển môn học sang không hoạt động thay vì xóa`,
       );
     }
     await this.subjectRepository.remove(subject);

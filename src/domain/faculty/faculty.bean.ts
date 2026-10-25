@@ -7,7 +7,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ActiveStatus } from '../enums';
 import { CatalogForm } from '../forms';
+import { Majors } from '../major/entity/major.entity';
 import { PAGE_SIZE, likeOf, offsetOf } from '../paging';
+import { Users } from '../user/entity/user.entity';
 import { Faculties } from './entity/faculty.entity';
 
 @Injectable()
@@ -82,6 +84,27 @@ export class FacultyBean {
         ? ActiveStatus.INACTIVE
         : ActiveStatus.ACTIVE;
     return this.facultyRepository.save(faculty);
+  }
+
+  async remove(id: number) {
+    const faculty = await this.findById(id);
+    const { manager } = this.facultyRepository;
+    const [majorCount, userCount] = await Promise.all([
+      manager.count(Majors, { where: { faculty: { id } } }),
+      manager.count(Users, { where: { faculty: { id } } }),
+    ]);
+    if (majorCount) {
+      throw new BadRequestException(
+        `Khoa ${faculty.code} còn ${majorCount} ngành, không thể xóa. Hãy chuyển khoa sang không hoạt động thay vì xóa`,
+      );
+    }
+    if (userCount) {
+      throw new BadRequestException(
+        `Khoa ${faculty.code} đang gán cho ${userCount} người dùng, hãy gán lại trước khi xóa`,
+      );
+    }
+    await this.facultyRepository.remove(faculty);
+    return faculty;
   }
 
   private async readValidForm(form: CatalogForm, ownId?: number) {

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { PermissionForm } from '../forms';
@@ -49,5 +53,19 @@ export class PermissionBean {
     return this.permissionRepository.save(
       this.permissionRepository.create({ code, name, description }),
     );
+  }
+
+  async remove(id: number, systemCodes: string[]) {
+    const permission = await this.permissionRepository.findOne({
+      where: { id },
+    });
+    if (!permission) throw new NotFoundException('Không tìm thấy quyền');
+    if (systemCodes.includes(permission.code)) {
+      throw new BadRequestException(
+        `Quyền ${permission.code} đang được hệ thống sử dụng, không thể xóa`,
+      );
+    }
+    await this.permissionRepository.remove(permission);
+    return permission;
   }
 }

@@ -65,6 +65,13 @@ export class FacultyController {
     return `Đã cập nhật khoa ${faculty.code}`;
   }
 
+  @Post(':id/delete')
+  @CmsAction(CmsPermission.UPDATE_FACULTY, { to: LIST, onError: LIST })
+  async deleteFaculty(@Param('id', ParseIntPipe) id: number) {
+    const faculty = await this.facultyBean.remove(id);
+    return `Đã xóa khoa ${faculty.code}`;
+  }
+
   @Post(':id/toggle-status')
   @CmsAction(CmsPermission.UPDATE_FACULTY, { to: LIST })
   async toggleFacultyStatus(@Param('id', ParseIntPipe) id: number) {

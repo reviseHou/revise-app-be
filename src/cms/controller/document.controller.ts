@@ -102,7 +102,7 @@ export class DocumentController {
     @Req() request: CmsRequest,
   ) {
     const document = await this.documentBean.hide(id, request.user);
-    return `Đã ẩn tài liệu ${document.title}`;
+    return `Đã chuyển tài liệu ${document.title} sang không hoạt động`;
   }
 
   @Post(':id/show')
@@ -112,6 +112,6 @@ export class DocumentController {
     @Req() request: CmsRequest,
   ) {
     const document = await this.documentBean.show(id, request.user);
-    return `Đã hiện lại tài liệu ${document.title}`;
+    return `Đã kích hoạt lại tài liệu ${document.title}`;
   }
 }

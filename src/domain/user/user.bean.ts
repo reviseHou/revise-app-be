@@ -5,10 +5,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Documents } from '../document/entity/document.entity';
 import { FacultyBean } from '../faculty/faculty.bean';
 import { AssignRoleForm } from '../forms';
 import { RoleBean } from '../role/role.bean';
 import { PAGE_SIZE, likeOf, offsetOf } from '../paging';
+import { Quizzes } from '../quiz/entity/quiz.entity';
 import { Users } from './entity/user.entity';
 
 export interface UserCountOfRole {
@@ -78,6 +80,39 @@ export class UserBean {
       relations: ['role', 'faculty'],
     });
     if (!user) throw new NotFoundException('Không tìm thấy người dùng');
+    return user;
+  }
+
+  async remove(id: string, actor: Users) {
+    if (id === actor.id) {
+      throw new BadRequestException(
+        'Không thể tự xóa tài khoản của chính mình',
+      );
+    }
+    const user = await this.findById(id);
+    const { manager } = this.userRepository;
+    const [documentCount, quizCount] = await Promise.all([
+      manager.count(Documents, { where: { uploader: { id } } }),
+      manager.count(Quizzes, { where: { createdBy: { id } } }),
+    ]);
+    if (documentCount || quizCount) {
+      throw new BadRequestException(
+        `${user.fullName} còn ${documentCount} tài liệu và ${quizCount} bài kiểm tra, không thể xóa`,
+      );
+    }
+    await manager.transaction(async (transaction) => {
+      await transaction.update(
+        Documents,
+        { reviewedBy: { id } },
+        { reviewedBy: null },
+      );
+      await transaction.update(
+        Quizzes,
+        { reviewedBy: { id } },
+        { reviewedBy: null },
+      );
+      await transaction.remove(user);
+    });
     return user;
   }
 }

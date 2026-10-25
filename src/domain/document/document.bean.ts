@@ -215,11 +215,6 @@ export class DocumentBean {
       facultyScopeOf(reviewer),
       document.subject?.major?.faculty?.id,
     );
-    if (document.uploader?.id === reviewer.id) {
-      throw new BadRequestException(
-        'Không được duyệt tài liệu do chính mình đăng',
-      );
-    }
     if (document.status !== requiredStatus) {
       throw new BadRequestException(
         'Trạng thái hiện tại của tài liệu không cho phép thao tác này',

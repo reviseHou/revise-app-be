@@ -100,7 +100,7 @@ export class QuizController {
     @Req() request: CmsRequest,
   ) {
     const quiz = await this.quizBean.hide(id, request.user);
-    return `Đã ẩn bài kiểm tra ${quiz.name}`;
+    return `Đã chuyển bài kiểm tra ${quiz.name} sang không hoạt động`;
   }
 
   @Post(':id/show')
@@ -110,6 +110,6 @@ export class QuizController {
     @Req() request: CmsRequest,
   ) {
     const quiz = await this.quizBean.show(id, request.user);
-    return `Đã hiện lại bài kiểm tra ${quiz.name}`;
+    return `Đã kích hoạt lại bài kiểm tra ${quiz.name}`;
   }
 }

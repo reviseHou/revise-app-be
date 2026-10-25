@@ -72,6 +72,13 @@ export class MajorController {
     return `Đã cập nhật ngành ${major.code}`;
   }
 
+  @Post(':id/delete')
+  @CmsAction(CmsPermission.UPDATE_MAJOR, { to: LIST, onError: LIST })
+  async deleteMajor(@Param('id', ParseIntPipe) id: number) {
+    const major = await this.majorBean.remove(id);
+    return `Đã xóa ngành ${major.code}`;
+  }
+
   @Post(':id/toggle-status')
   @CmsAction(CmsPermission.UPDATE_MAJOR, { to: LIST })
   async toggleMajorStatus(@Param('id', ParseIntPipe) id: number) {

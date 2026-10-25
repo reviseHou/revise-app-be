@@ -20,7 +20,7 @@
             <label for="facultyId">Khoa phụ trách</label>
             <select class="form-control" id="facultyId" name="facultyId">
                 <option value="">Tất cả các khoa</option>
-                {{#each faculties}}<option value="{{id}}" {{#if (eq id @root.account.faculty.id)}}selected{{/if}}>{{code}} – {{name}}{{#unless (eq status 'ACTIVE')}} (đã ẩn){{/unless}}</option>{{/each}}
+                {{#each faculties}}<option value="{{id}}" {{#if (eq id @root.account.faculty.id)}}selected{{/if}}>{{code}} – {{name}}{{#unless (eq status 'ACTIVE')}} (không hoạt động){{/unless}}</option>{{/each}}
             </select>
             <small class="form-text text-muted">Chọn khoa thì chỉ duyệt được tài liệu và bài kiểm tra thuộc khoa đó. Để "Tất cả các khoa" thì duyệt được mọi khoa.</small>
         </div>

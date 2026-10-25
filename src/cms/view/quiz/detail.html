@@ -50,9 +50,6 @@
     </div>
 
     <div class="col-lg-4">
-        {{#if (eq quiz.createdBy.id user.id)}}
-        <div class="callout callout-warning">Đây là bài kiểm tra do chính bạn tạo nên bạn không thể duyệt.</div>
-        {{else}}
             {{#if (eq quiz.status 'PENDING')}}
             <div class="card card-success card-outline">
                 <div class="card-header"><h3 class="card-title">Duyệt</h3></div>
@@ -82,14 +79,13 @@
             {{/if}}
             {{#if (eq quiz.status 'ACTIVE')}}
             <div class="card"><div class="card-body">
-                <button type="button" class="btn btn-default btn-block" data-delete-action="/cms/quizzes/{{quiz.id}}/hide" data-confirm-title="Bạn có chắc chắn muốn ẩn bài kiểm tra này không?" data-delete-name="{{quiz.name}}"><i class="fas fa-eye-slash"></i> Ẩn bài kiểm tra</button>
+                <button type="button" class="btn btn-default btn-block" data-delete-action="/cms/quizzes/{{quiz.id}}/hide" data-confirm-title="Bạn có chắc chắn muốn chuyển bài kiểm tra này sang không hoạt động không?" data-delete-name="{{quiz.name}}"><i class="fas fa-eye-slash"></i> Ngừng hoạt động</button>
             </div></div>
             {{/if}}
             {{#if (eq quiz.status 'INACTIVE')}}
             <div class="card"><div class="card-body">
-                <button type="button" class="btn btn-primary btn-block" data-delete-action="/cms/quizzes/{{quiz.id}}/show" data-confirm-title="Bạn có chắc chắn muốn hiện lại bài kiểm tra này không?" data-delete-name="{{quiz.name}}"><i class="fas fa-eye"></i> Hiện lại bài kiểm tra</button>
+                <button type="button" class="btn btn-primary btn-block" data-delete-action="/cms/quizzes/{{quiz.id}}/show" data-confirm-title="Bạn có chắc chắn muốn kích hoạt lại bài kiểm tra này không?" data-delete-name="{{quiz.name}}"><i class="fas fa-eye"></i> Kích hoạt lại</button>
             </div></div>
             {{/if}}
-        {{/if}}
     </div>
 </div>

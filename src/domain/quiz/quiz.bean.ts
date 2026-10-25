@@ -168,11 +168,6 @@ export class QuizBean {
       facultyScopeOf(reviewer),
       quiz.subject?.major?.faculty?.id,
     );
-    if (quiz.createdBy?.id === reviewer.id) {
-      throw new BadRequestException(
-        'Không được duyệt bài kiểm tra do chính mình tạo',
-      );
-    }
     if (quiz.status !== requiredStatus) {
       throw new BadRequestException(
         'Trạng thái hiện tại của bài kiểm tra không cho phép thao tác này',

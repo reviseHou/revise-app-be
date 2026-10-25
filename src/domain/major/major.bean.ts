@@ -9,6 +9,7 @@ import { ActiveStatus } from '../enums';
 import { FacultyBean } from '../faculty/faculty.bean';
 import { CatalogForm, MajorForm } from '../forms';
 import { PAGE_SIZE, likeOf, offsetOf } from '../paging';
+import { Subjects } from '../subject/entity/subject.entity';
 import { Majors } from './entity/major.entity';
 
 @Injectable()
@@ -76,6 +77,20 @@ export class MajorBean {
         ? ActiveStatus.INACTIVE
         : ActiveStatus.ACTIVE;
     return this.majorRepository.save(major);
+  }
+
+  async remove(id: number) {
+    const major = await this.findById(id);
+    const subjectCount = await this.majorRepository.manager.count(Subjects, {
+      where: { major: { id } },
+    });
+    if (subjectCount) {
+      throw new BadRequestException(
+        `Ngành ${major.name} còn ${subjectCount} môn học, không thể xóa. Hãy chuyển ngành sang không hoạt động thay vì xóa`,
+      );
+    }
+    await this.majorRepository.remove(major);
+    return major;
   }
 
   private async readValidForm(form: CatalogForm, ownId?: number) {
