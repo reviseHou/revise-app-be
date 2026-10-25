@@ -24,7 +24,7 @@ export class MajorBean {
     const query = this.majorRepository
       .createQueryBuilder('major')
       .leftJoinAndSelect('major.faculty', 'faculty')
-      .orderBy('major.code', 'ASC')
+      .orderBy('major.dateCreated', 'DESC')
       .skip(offsetOf(page))
       .take(PAGE_SIZE);
     if (keyword) {

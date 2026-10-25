@@ -25,7 +25,7 @@ export class SubjectBean {
       .createQueryBuilder('subject')
       .leftJoinAndSelect('subject.major', 'major')
       .leftJoinAndSelect('major.faculty', 'faculty')
-      .orderBy('subject.name', 'ASC')
+      .orderBy('subject.dateCreated', 'DESC')
       .skip(offsetOf(page))
       .take(PAGE_SIZE);
     if (keyword) {

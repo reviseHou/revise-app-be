@@ -54,14 +54,13 @@ export class QuizBean {
     page: number,
     scope: FacultyScope,
   ) {
-    const oldestFirst = status === QuizStatus.PENDING;
     const query = this.quizRepository
       .createQueryBuilder('quiz')
       .leftJoinAndSelect('quiz.createdBy', 'createdBy')
       .leftJoinAndSelect('quiz.subject', 'subject')
       .leftJoinAndSelect('subject.major', 'major')
       .leftJoinAndSelect('major.faculty', 'faculty')
-      .orderBy('quiz.dateModified', oldestFirst ? 'ASC' : 'DESC')
+      .orderBy('quiz.dateCreated', 'DESC')
       .skip(offsetOf(page))
       .take(PAGE_SIZE);
     applyFacultyScope(query, scope, 'faculty.id');

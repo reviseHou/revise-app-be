@@ -103,14 +103,13 @@ export class DocumentBean {
     page: number,
     scope: FacultyScope,
   ) {
-    const oldestFirst = status === DocumentStatus.PENDING;
     const query = this.documentRepository
       .createQueryBuilder('document')
       .leftJoinAndSelect('document.uploader', 'uploader')
       .leftJoinAndSelect('document.subject', 'subject')
       .leftJoinAndSelect('subject.major', 'major')
       .leftJoinAndSelect('major.faculty', 'faculty')
-      .orderBy('document.dateCreated', oldestFirst ? 'ASC' : 'DESC')
+      .orderBy('document.dateCreated', 'DESC')
       .skip(offsetOf(page))
       .take(PAGE_SIZE);
     applyFacultyScope(query, scope, 'faculty.id');

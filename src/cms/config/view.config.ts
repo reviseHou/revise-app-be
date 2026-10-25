@@ -28,6 +28,7 @@ export function setupViews(app: NestExpressApplication) {
   helpers({ handlebars: hbs.handlebars });
   registerLayoutHelpers();
   registerListHelpers();
+  registerFileHelpers();
   app.use('/cms', shareRequestWithViews);
 }
 
@@ -65,6 +66,23 @@ function registerLayoutHelpers() {
     'block',
     (name: string, options: BlockOptions) =>
       options.data.root.blocks?.[name] ?? '',
+  );
+}
+
+const OFFICE_EXTENSIONS = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'];
+const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg'];
+
+const extensionOf = (url: string) =>
+  url.split(/[?#]/)[0].split('.').pop()?.toLowerCase() ?? '';
+
+function registerFileHelpers() {
+  hbs.registerHelper('previewUrl', (url: string) =>
+    OFFICE_EXTENSIONS.includes(extensionOf(url))
+      ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`
+      : url,
+  );
+  hbs.registerHelper('isImageFile', (url: string) =>
+    IMAGE_EXTENSIONS.includes(extensionOf(url)),
   );
 }
 

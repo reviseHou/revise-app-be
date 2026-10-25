@@ -23,7 +23,7 @@ export class FacultyBean {
     const query = this.facultyRepository
       .createQueryBuilder('faculty')
       .loadRelationCountAndMap('faculty.majorCount', 'faculty.majors')
-      .orderBy('faculty.code', 'ASC')
+      .orderBy('faculty.dateCreated', 'DESC')
       .skip(offsetOf(page))
       .take(PAGE_SIZE);
     if (keyword) {

@@ -14,6 +14,8 @@ import { extname } from 'path';
 import * as crypto from 'crypto';
 import { JwtAuthGuard } from 'src/domain/auth/guards/jwt.guard';
 
+const INLINE_EXTENSIONS = ['.pdf', '.png', '.jpg', '.jpeg'];
+
 @Controller('upload')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('access-token')
@@ -66,12 +68,21 @@ export class UploadController {
       );
     }
 
-    const timestamp = Math.floor(Date.now() / 1000).toString();
-    const folder = process.env.CLOUDINARY_UPLOAD_FOLDER || 'course-documents';
-    const signaturePayload = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
+    const params: Record<string, string> = {
+      folder: process.env.CLOUDINARY_UPLOAD_FOLDER || 'course-documents',
+      timestamp: Math.floor(Date.now() / 1000).toString(),
+    };
+    const extension = extname(file.originalname).toLowerCase();
+    const isRaw = !INLINE_EXTENSIONS.includes(extension);
+    if (isRaw) params.public_id = `${crypto.randomUUID()}${extension}`;
+
+    const signaturePayload = Object.keys(params)
+      .sort()
+      .map((key) => `${key}=${params[key]}`)
+      .join('&');
     const signature = crypto
       .createHash('sha1')
-      .update(signaturePayload)
+      .update(`${signaturePayload}${apiSecret}`)
       .digest('hex');
 
     const formData = new FormData();
@@ -79,13 +90,14 @@ export class UploadController {
       'file',
       `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
     );
+    for (const [key, value] of Object.entries(params)) {
+      formData.append(key, value);
+    }
     formData.append('api_key', apiKey);
-    formData.append('timestamp', timestamp);
-    formData.append('folder', folder);
     formData.append('signature', signature);
 
     const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
+      `https://api.cloudinary.com/v1_1/${cloudName}/${isRaw ? 'raw' : 'auto'}/upload`,
       {
         method: 'POST',
         body: formData,

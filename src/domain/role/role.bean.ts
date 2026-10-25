@@ -31,7 +31,7 @@ export class RoleBean {
       .createQueryBuilder('role')
       .leftJoinAndSelect('role.rolePermissions', 'rolePermission')
       .leftJoinAndSelect('rolePermission.permission', 'permission')
-      .orderBy('role.id', 'ASC')
+      .orderBy('role.dateCreated', 'DESC')
       .skip(offsetOf(page))
       .take(PAGE_SIZE);
     if (keyword) {

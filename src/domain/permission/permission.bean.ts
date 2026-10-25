@@ -19,7 +19,7 @@ export class PermissionBean {
   async search(keyword: string, page: number) {
     const query = this.permissionRepository
       .createQueryBuilder('permission')
-      .orderBy('permission.code', 'ASC')
+      .orderBy('permission.dateCreated', 'DESC')
       .skip(offsetOf(page))
       .take(PAGE_SIZE);
     if (keyword) {

@@ -28,10 +28,22 @@
                     <dt class="col-sm-3">Năm</dt>
                     <dd class="col-sm-9">{{#if document.year}}{{document.year}}{{else}}<span class="text-muted">(trống)</span>{{/if}}</dd>
                     <dt class="col-sm-3">Tệp</dt>
-                    <dd class="col-sm-9">{{#if document.filePath}}<a href="{{document.filePath}}" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt"></i> Mở tệp đính kèm</a>{{#if document.mediaType}} <span class="text-muted">({{document.mediaType}})</span>{{/if}}{{else}}<span class="text-muted">Không có tệp đính kèm</span>{{/if}}</dd>
+                    <dd class="col-sm-9">{{#if document.filePath}}<a href="{{previewUrl document.filePath}}" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt"></i> Mở tệp đính kèm</a>{{#if document.mediaType}} <span class="text-muted">({{document.mediaType}})</span>{{/if}}{{else}}<span class="text-muted">Không có tệp đính kèm</span>{{/if}}</dd>
                 </dl>
             </div>
         </div>
+        {{#if document.filePath}}
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Xem trước</h3></div>
+            <div class="card-body p-0">
+                {{#if (isImageFile document.filePath)}}
+                <img src="{{document.filePath}}" alt="{{document.title}}" class="file-preview-image">
+                {{else}}
+                <iframe src="{{previewUrl document.filePath}}" title="{{document.title}}" class="file-preview"></iframe>
+                {{/if}}
+            </div>
+        </div>
+        {{/if}}
     </div>
 
     <div class="col-lg-4">
