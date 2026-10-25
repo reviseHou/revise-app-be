@@ -5,13 +5,18 @@ import {
   UploadedFile,
   BadRequestException,
   InternalServerErrorException,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { extname } from 'path';
 import * as crypto from 'crypto';
+import { JwtAuthGuard } from 'src/domain/auth/guards/jwt.guard';
 
 @Controller('upload')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth('access-token')
 export class UploadController {
   @Post()
   @UseInterceptors(
