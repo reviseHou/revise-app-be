@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { DocumentStatus } from '../../enums';
+import { DocumentCategory, DocumentStatus } from '../../enums';
 import { Subjects } from '../../subject/entity/subject.entity';
 import { Users } from '../../user/entity/user.entity';
 
@@ -41,6 +41,9 @@ export class Documents {
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   mediaType?: string | null;
+
+  @Column({ type: 'varchar', length: 20, default: DocumentCategory.OTHER })
+  category: DocumentCategory;
 
   @Column({ type: 'varchar', length: 20, default: DocumentStatus.PENDING })
   status: DocumentStatus;

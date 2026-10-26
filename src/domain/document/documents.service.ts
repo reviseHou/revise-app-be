@@ -1,18 +1,28 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Documents } from 'src/domain/document/entity/document.entity';
-import { DocumentStatus } from 'src/domain/enums';
-import { Repository } from 'typeorm';
+import {
+  DocumentCategory,
+  DocumentSort,
+  DocumentStatus,
+} from 'src/domain/enums';
+import { Users } from 'src/domain/user/entity/user.entity';
+import { Raw, Repository } from 'typeorm';
 import { Subjects } from '../subject/entity/subject.entity';
 import { CreateDocumentDto, UpdateDocumentDto } from './dto/documents.dto';
+import { DocumentViews } from './entity/document-view.entity';
 
 const WITH_RELATIONS = ['uploader', 'subject'];
+
+const VIEW_WINDOW_MINUTES = 30;
 
 @Injectable()
 export class DocumentsService {
   constructor(
     @InjectRepository(Documents)
     private documentsRepository: Repository<Documents>,
+    @InjectRepository(DocumentViews)
+    private viewsRepository: Repository<DocumentViews>,
   ) {}
 
   async create(dto: CreateDocumentDto) {
@@ -31,13 +41,14 @@ export class DocumentsService {
     return this.documentsRepository.find({ relations: WITH_RELATIONS });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, withViewCount = false) {
     const document = await this.documentsRepository.findOne({
       where: { id: String(id) },
       relations: WITH_RELATIONS,
     });
     if (!document) throw new NotFoundException('Không tìm thấy tài liệu');
-    return document;
+    if (!withViewCount) return document;
+    return Object.assign(document, { viewCount: await this.countViews(id) });
   }
 
   findByUploaderId(uploaderId: string) {
@@ -47,11 +58,71 @@ export class DocumentsService {
     });
   }
 
-  findBySubjectId(subjectId: number) {
-    return this.documentsRepository.find({
-      where: { subject: { id: subjectId }, status: DocumentStatus.ACTIVE },
-      relations: WITH_RELATIONS,
+  async findBySubjectId(
+    subjectId: number,
+    category?: DocumentCategory,
+    sort = DocumentSort.NEWEST,
+  ) {
+    const query = this.documentsRepository
+      .createQueryBuilder('document')
+      .leftJoinAndSelect('document.uploader', 'uploader')
+      .leftJoinAndSelect('document.subject', 'subject')
+      .addSelect(
+        (subQuery) =>
+          subQuery
+            .select('COUNT(view.id)')
+            .from(DocumentViews, 'view')
+            .where('view.document_id = document.id'),
+        'view_count',
+      )
+      .where('subject.id = :subjectId', { subjectId })
+      .andWhere('document.status = :status', { status: DocumentStatus.ACTIVE });
+    if (category) query.andWhere('document.category = :category', { category });
+    if (sort === DocumentSort.VIEWS) query.orderBy('view_count', 'DESC');
+    query.addOrderBy(
+      'document.dateCreated',
+      sort === DocumentSort.OLDEST ? 'ASC' : 'DESC',
+    );
+
+    const { entities, raw } = await query.getRawAndEntities<{
+      document_id: string;
+      view_count: string;
+    }>();
+    const viewCountById = new Map(
+      raw.map((row) => [String(row.document_id), Number(row.view_count)]),
+    );
+    return entities.map((document) =>
+      Object.assign(document, {
+        viewCount: viewCountById.get(document.id) ?? 0,
+      }),
+    );
+  }
+
+  async addView(id: number, user: Users) {
+    const viewable = await this.documentsRepository.existsBy({
+      id: String(id),
+      status: DocumentStatus.ACTIVE,
     });
+    if (!viewable) throw new NotFoundException('Không tìm thấy tài liệu');
+
+    const viewedRecently = await this.viewsRepository.existsBy({
+      document: { id: String(id) },
+      user: { id: user.id },
+      // so sánh bằng now() của DB vì date_created lưu theo giờ DB, không theo giờ máy chủ Node
+      dateCreated: Raw(
+        (column) =>
+          `${column} > now() - interval '${VIEW_WINDOW_MINUTES} minutes'`,
+      ),
+    });
+    if (!viewedRecently) {
+      await this.viewsRepository.save(
+        this.viewsRepository.create({
+          document: { id: String(id) },
+          user: { id: user.id },
+        }),
+      );
+    }
+    return { viewCount: await this.countViews(id) };
   }
 
   async update(id: number, dto: UpdateDocumentDto) {
@@ -66,5 +137,9 @@ export class DocumentsService {
     const document = await this.findOne(id);
     await this.documentsRepository.remove(document);
     return document;
+  }
+
+  private countViews(id: number) {
+    return this.viewsRepository.countBy({ document: { id: String(id) } });
   }
 }

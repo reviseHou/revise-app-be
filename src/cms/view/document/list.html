@@ -11,19 +11,20 @@
 </form>
 <div class="table-wrap">
     <table class="table table-bordered table-hover mb-0">
-        <thead><tr><th style="width:60px">STT</th><th>Tài liệu</th><th>Khoa › Ngành › Môn</th><th>Người đăng</th><th>Ngày đăng</th><th>Trạng thái</th></tr></thead>
+        <thead><tr><th style="width:60px">STT</th><th>Tài liệu</th><th>Loại</th><th>Khoa › Ngành › Môn</th><th>Người đăng</th><th>Ngày đăng</th><th>Trạng thái</th></tr></thead>
         <tbody>
         {{#each documents}}
         <tr>
             <td>{{add (multiply (add @root.page -1) @root.pageSize) (add @index 1)}}</td>
             <td><a href="/cms/documents/{{id}}">{{title}}</a></td>
+            <td>{{> category_label category=category}}</td>
             <td>{{#if subject.major}}{{subject.major.faculty.code}} › {{subject.major.code}} › {{/if}}{{subject.name}}{{#unless subject.major}} <span class="text-muted">(môn chưa thuộc ngành)</span>{{/unless}}</td>
             <td>{{uploader.fullName}}<div class="text-muted small">{{uploader.email}}</div></td>
             <td>{{moment dateCreated "DD/MM/YYYY HH:mm"}}</td>
             <td>{{> status_badge status=status}}</td>
         </tr>
         {{else}}
-        <tr><td colspan="6" class="text-muted p-3">Không có tài liệu nào</td></tr>
+        <tr><td colspan="7" class="text-muted p-3">Không có tài liệu nào</td></tr>
         {{/each}}
         </tbody>
     </table>

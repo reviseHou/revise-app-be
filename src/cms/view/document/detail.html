@@ -11,6 +11,8 @@
                 <dl class="row">
                     <dt class="col-sm-3">Môn học</dt>
                     <dd class="col-sm-9">{{#if document.subject.major}}{{document.subject.major.faculty.code}} › {{document.subject.major.code}} › {{/if}}{{document.subject.name}}{{#unless document.subject.major}} <span class="text-muted">(môn chưa thuộc ngành)</span>{{/unless}}</dd>
+                    <dt class="col-sm-3">Loại</dt>
+                    <dd class="col-sm-9">{{> category_label category=document.category}}</dd>
                     <dt class="col-sm-3">Người đăng</dt>
                     <dd class="col-sm-9">{{document.uploader.fullName}} <span class="text-muted">({{document.uploader.email}})</span></dd>
                     <dt class="col-sm-3">Ngày đăng</dt>

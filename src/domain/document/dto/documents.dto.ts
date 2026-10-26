@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { DocumentCategory } from '../../enums';
 
 export class CreateDocumentDto {
   @ApiProperty()
@@ -25,6 +26,11 @@ export class CreateDocumentDto {
   @IsString()
   @IsOptional()
   mediaType?: string;
+
+  @ApiProperty({ required: false, enum: DocumentCategory })
+  @IsEnum(DocumentCategory, { message: 'Loại tài liệu không hợp lệ' })
+  @IsOptional()
+  category?: DocumentCategory;
 
   @ApiProperty()
   @IsString()
@@ -60,6 +66,11 @@ export class UpdateDocumentDto {
   @IsString()
   @IsOptional()
   mediaType?: string;
+
+  @ApiProperty({ required: false, enum: DocumentCategory })
+  @IsEnum(DocumentCategory, { message: 'Loại tài liệu không hợp lệ' })
+  @IsOptional()
+  category?: DocumentCategory;
 
   @ApiProperty({ required: false })
   @IsNumber()

@@ -13,6 +13,7 @@ import { CmsModule } from './cms/cms.module';
 import { QuizModule } from './domain/quiz/quiz.module';
 import { CommentModule } from './domain/comment/comment.module';
 import { SavedModule } from './domain/saved/saved.module';
+import { RatingModule } from './domain/rating/rating.module';
 import { SnakeNamingStrategy } from './database/snake-naming.strategy';
 
 @Module({
@@ -43,6 +44,7 @@ import { SnakeNamingStrategy } from './database/snake-naming.strategy';
     QuizModule,
     CommentModule,
     SavedModule,
+    RatingModule,
     CmsModule,
   ],
 })

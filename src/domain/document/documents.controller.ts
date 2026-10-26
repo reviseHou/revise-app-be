@@ -7,10 +7,14 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from 'src/domain/auth/decorator/current-user.decorator';
 import { JwtAuthGuard } from 'src/domain/auth/guards/jwt.guard';
+import { DocumentCategory, DocumentSort } from 'src/domain/enums';
+import { Users } from 'src/domain/user/entity/user.entity';
 import { DocumentsService } from './documents.service';
 import { CreateDocumentDto, UpdateDocumentDto } from './dto/documents.dto';
 
@@ -28,7 +32,7 @@ export class DocumentsController {
 
   @Get('/:id')
   findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.documentsService.findOne(id);
+    return this.documentsService.findOne(id, true);
   }
 
   @Get('/author/:authorId')
@@ -37,8 +41,23 @@ export class DocumentsController {
   }
 
   @Get('/subject/:subjectId')
-  findBySubject(@Param('subjectId') subjectId: number) {
-    return this.documentsService.findBySubjectId(subjectId);
+  @ApiQuery({ name: 'category', required: false, enum: DocumentCategory })
+  @ApiQuery({ name: 'sort', required: false, enum: DocumentSort })
+  findBySubject(
+    @Param('subjectId') subjectId: number,
+    @Query('category') categoryParam?: string,
+    @Query('sort') sortParam?: string,
+  ) {
+    const category = Object.values(DocumentCategory).find(
+      (c) => c === categoryParam,
+    );
+    const sort = Object.values(DocumentSort).find((s) => s === sortParam);
+    return this.documentsService.findBySubjectId(subjectId, category, sort);
+  }
+
+  @Post('/:id/views')
+  addView(@CurrentUser() user: Users, @Param('id', ParseIntPipe) id: number) {
+    return this.documentsService.addView(id, user);
   }
 
   @Patch('/:id')

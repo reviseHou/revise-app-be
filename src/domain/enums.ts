@@ -30,3 +30,18 @@ export enum SourceType {
   DOCUMENT = 'DOCUMENT',
   QUIZ = 'QUIZ',
 }
+
+export enum DocumentCategory {
+  SLIDE = 'SLIDE',
+  OUTLINE = 'OUTLINE',
+  TEXTBOOK = 'TEXTBOOK',
+  EXERCISE = 'EXERCISE',
+  EXAM = 'EXAM',
+  OTHER = 'OTHER',
+}
+
+export enum DocumentSort {
+  NEWEST = 'newest',
+  OLDEST = 'oldest',
+  VIEWS = 'views',
+}
