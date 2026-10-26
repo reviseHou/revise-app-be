@@ -24,9 +24,6 @@ export class UploadController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
-      limits: {
-        fileSize: 10 * 1024 * 1024,
-      },
       fileFilter: (req, file, cb) => {
         const allowedExtensions = [
           '.pdf',
