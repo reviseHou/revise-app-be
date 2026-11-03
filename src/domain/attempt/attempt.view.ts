@@ -20,7 +20,8 @@ export interface AttemptView {
   status: AttemptStatus;
   dateStarted: Date;
   dateSubmitted?: Date | null;
-  expiresAt: Date;
+  startedAt: Date;
+  now: Date;
   totalQuestion: number;
   totalAnswered: number;
   totalCorrect?: number | null;
@@ -80,7 +81,8 @@ export function toAttemptView(
     status: attempt.status,
     dateStarted: attempt.dateStarted,
     dateSubmitted: attempt.dateSubmitted,
-    expiresAt: expiresAtOf(attempt, quiz.estimateMinute),
+    startedAt: attempt.dateStarted,
+    now: new Date(),
     totalQuestion,
     totalAnswered,
     totalCorrect: submitted ? attempt.totalCorrect : null,

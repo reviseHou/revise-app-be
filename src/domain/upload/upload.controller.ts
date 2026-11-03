@@ -15,6 +15,7 @@ import * as crypto from 'crypto';
 import { JwtAuthGuard } from 'src/domain/auth/guards/jwt.guard';
 
 const INLINE_EXTENSIONS = ['.pdf', '.png', '.jpg', '.jpeg'];
+const MAX_FILE_MB = 20;
 
 @Controller('upload')
 @UseGuards(JwtAuthGuard)
@@ -24,6 +25,7 @@ export class UploadController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
+      limits: { fileSize: MAX_FILE_MB * 1024 * 1024 },
       fileFilter: (req, file, cb) => {
         const allowedExtensions = [
           '.pdf',

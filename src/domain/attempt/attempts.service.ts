@@ -96,13 +96,12 @@ export class AttemptsService {
     const answers = assertUniqueQuestions(body.answers ?? []);
 
     const attempt = await this.findOwned(user, attemptId);
-    const quiz = await this.quizzesService.summary(attempt.quiz.id);
     if (attempt.status === AttemptStatus.SUBMITTED) {
       throw new ConflictException('Lượt làm bài đã được nộp');
     }
 
-    const lateAnswers = this.isExpired(attempt, quiz) ? [] : answers;
-    await this.grade(attempt, lateAnswers);
+    // No time check on submit: the client tracks the deadline (startedAt + now) and auto-submits when it ends.
+    await this.grade(attempt, answers);
     return this.get(user, attemptId);
   }
 

@@ -88,9 +88,10 @@ export class QuizAuthoringService {
 
   async update(user: Users, id: number, body: QuizContext) {
     const quiz = await this.findOwned(user, id);
-    if ((await this.countAttempts(id)) > 0) {
+    // Approved quizzes can only be deleted; editing is allowed while PENDING or REJECTED.
+    if (![QuizStatus.PENDING, QuizStatus.REJECTED].includes(quiz.status)) {
       throw new ConflictException(
-        'Bài kiểm tra đã có người làm nên không sửa được. Hãy tạo bài mới.',
+        'Bài kiểm tra đã được duyệt nên không thể chỉnh sửa. Bạn có thể xóa và tạo bài mới.',
       );
     }
     const input = assertOneCorrectAnswer(body);

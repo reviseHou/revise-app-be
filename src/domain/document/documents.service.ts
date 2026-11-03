@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Documents } from 'src/domain/document/entity/document.entity';
 import {
@@ -15,6 +19,9 @@ import { DocumentViews } from './entity/document-view.entity';
 const WITH_RELATIONS = ['uploader', 'subject'];
 
 const VIEW_WINDOW_MINUTES = 30;
+
+// Approved content (ACTIVE, or INACTIVE after being hidden) can only be deleted, not edited.
+const EDITABLE_STATUSES = [DocumentStatus.PENDING, DocumentStatus.REJECTED];
 
 @Injectable()
 export class DocumentsService {
@@ -127,9 +134,18 @@ export class DocumentsService {
 
   async update(id: number, dto: UpdateDocumentDto) {
     const document = await this.findOne(id);
+    if (!EDITABLE_STATUSES.includes(document.status)) {
+      throw new ConflictException(
+        'Tài liệu đã được duyệt nên không thể chỉnh sửa. Bạn có thể xóa và tải lên lại.',
+      );
+    }
     const { subjectId, ...fields } = dto;
     this.documentsRepository.merge(document, fields);
     if (subjectId) document.subject = { id: subjectId } as Subjects;
+    document.status = DocumentStatus.PENDING;
+    document.rejectReason = null;
+    document.reviewedBy = null;
+    document.dateReviewed = null;
     return this.documentsRepository.save(document);
   }
 
