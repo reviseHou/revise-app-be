@@ -6,6 +6,7 @@ import {
   toQuestionView,
 } from '../quiz/quiz.view';
 import { AttemptStatus } from '../enums';
+import { seededShuffle, seedOf } from './shuffle';
 import { Attempts } from './entity/attempt.entity';
 import { UserAnswers } from './entity/user-answer.entity';
 
@@ -55,10 +56,23 @@ export function toAttemptView(
     userAnswers.map((userAnswer) => [userAnswer.question.id, userAnswer]),
   );
 
-  const questionViews = [...questions].sort(byPosition).map((question) => {
+  const attemptId = Number(attempt.id);
+  const ordered = seededShuffle(
+    [...questions].sort(byPosition),
+    seedOf(attemptId),
+  );
+
+  const questionViews = ordered.map((question, index) => {
     const userAnswer = byQuestion.get(question.id);
+    const base = toQuestionView(question, submitted);
+    const answers = seededShuffle(
+      base.answers,
+      seedOf(attemptId, question.id),
+    ).map((answer, answerIndex) => ({ ...answer, position: answerIndex + 1 }));
     const view: AttemptQuestionView = {
-      ...toQuestionView(question, submitted),
+      ...base,
+      position: index + 1,
+      answers,
       selectedAnswerId: userAnswer?.answer?.id ?? null,
     };
     if (submitted) {

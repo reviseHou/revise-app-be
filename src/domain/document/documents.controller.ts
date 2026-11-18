@@ -26,8 +26,28 @@ export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
   @Get('/')
-  findAll() {
-    return this.documentsService.findAll();
+  @ApiQuery({ name: 'category', required: false, enum: DocumentCategory })
+  @ApiQuery({ name: 'sort', required: false, enum: DocumentSort })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'offset', required: false, type: Number })
+  findAll(
+    @Query('category') categoryParam?: string,
+    @Query('sort') sortParam?: string,
+    @Query('limit') limitParam?: string,
+    @Query('offset') offsetParam?: string,
+  ) {
+    const category = Object.values(DocumentCategory).find(
+      (c) => c === categoryParam,
+    );
+    const sort = Object.values(DocumentSort).find((s) => s === sortParam);
+    const limit = Number(limitParam);
+    const offset = Number(offsetParam);
+    return this.documentsService.findAll(
+      category,
+      sort,
+      Number.isInteger(limit) && limit > 0 ? Math.min(limit, 100) : undefined,
+      Number.isInteger(offset) && offset > 0 ? offset : undefined,
+    );
   }
 
   @Get('/:id')

@@ -44,8 +44,13 @@ export class DocumentsService {
     return this.findOne(Number(document.id));
   }
 
-  findAll() {
-    return this.documentsRepository.find({ relations: WITH_RELATIONS });
+  findAll(
+    category?: DocumentCategory,
+    sort = DocumentSort.NEWEST,
+    limit?: number,
+    offset?: number,
+  ) {
+    return this.findActive({ category, sort, limit, offset });
   }
 
   async findOne(id: number, withViewCount = false) {
@@ -65,11 +70,27 @@ export class DocumentsService {
     });
   }
 
-  async findBySubjectId(
+  findBySubjectId(
     subjectId: number,
     category?: DocumentCategory,
     sort = DocumentSort.NEWEST,
   ) {
+    return this.findActive({ subjectId, category, sort });
+  }
+
+  private async findActive({
+    subjectId,
+    category,
+    sort = DocumentSort.NEWEST,
+    limit,
+    offset,
+  }: {
+    subjectId?: number;
+    category?: DocumentCategory;
+    sort?: DocumentSort;
+    limit?: number;
+    offset?: number;
+  }) {
     const query = this.documentsRepository
       .createQueryBuilder('document')
       .leftJoinAndSelect('document.uploader', 'uploader')
@@ -82,9 +103,11 @@ export class DocumentsService {
             .where('view.document_id = document.id'),
         'view_count',
       )
-      .where('subject.id = :subjectId', { subjectId })
-      .andWhere('document.status = :status', { status: DocumentStatus.ACTIVE });
+      .where('document.status = :status', { status: DocumentStatus.ACTIVE });
+    if (subjectId) query.andWhere('subject.id = :subjectId', { subjectId });
     if (category) query.andWhere('document.category = :category', { category });
+    if (limit) query.limit(limit);
+    if (offset) query.offset(offset);
     if (sort === DocumentSort.VIEWS) query.orderBy('view_count', 'DESC');
     query.addOrderBy(
       'document.dateCreated',

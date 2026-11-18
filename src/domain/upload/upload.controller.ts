@@ -15,7 +15,7 @@ import * as crypto from 'crypto';
 import { JwtAuthGuard } from 'src/domain/auth/guards/jwt.guard';
 
 const INLINE_EXTENSIONS = ['.pdf', '.png', '.jpg', '.jpeg'];
-const MAX_FILE_MB = 20;
+const MAX_FILE_MB = 10;
 
 @Controller('upload')
 @UseGuards(JwtAuthGuard)
