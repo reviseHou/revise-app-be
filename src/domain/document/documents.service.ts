@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -32,12 +33,12 @@ export class DocumentsService {
     private viewsRepository: Repository<DocumentViews>,
   ) {}
 
-  async create(dto: CreateDocumentDto) {
-    const { uploaderId, subjectId, ...fields } = dto;
+  async create(dto: CreateDocumentDto, user: Users) {
+    const { subjectId, ...fields } = dto;
     const document = await this.documentsRepository.save(
       this.documentsRepository.create({
         ...fields,
-        uploader: { id: uploaderId },
+        uploader: { id: user.id },
         subject: { id: subjectId },
       }),
     );
@@ -155,8 +156,9 @@ export class DocumentsService {
     return { viewCount: await this.countViews(id) };
   }
 
-  async update(id: number, dto: UpdateDocumentDto) {
+  async update(id: number, dto: UpdateDocumentDto, user: Users) {
     const document = await this.findOne(id);
+    this.assertUploader(document, user);
     if (!EDITABLE_STATUSES.includes(document.status)) {
       throw new ConflictException(
         'Tài liệu đã được duyệt nên không thể chỉnh sửa. Bạn có thể xóa và tải lên lại.',
@@ -172,10 +174,19 @@ export class DocumentsService {
     return this.documentsRepository.save(document);
   }
 
-  async remove(id: number) {
+  async remove(id: number, user: Users) {
     const document = await this.findOne(id);
+    this.assertUploader(document, user);
     await this.documentsRepository.remove(document);
     return document;
+  }
+
+  private assertUploader(document: Documents, user: Users) {
+    if (document.uploader?.id !== user.id) {
+      throw new ForbiddenException(
+        'Chỉ người đăng mới được sửa hoặc xóa tài liệu',
+      );
+    }
   }
 
   private countViews(id: number) {

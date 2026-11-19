@@ -33,10 +33,6 @@ export class CreateDocumentDto {
   category?: DocumentCategory;
 
   @ApiProperty()
-  @IsString()
-  uploaderId: string;
-
-  @ApiProperty()
   @IsNumber()
   subjectId: number;
 }

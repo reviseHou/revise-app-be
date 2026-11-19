@@ -82,19 +82,20 @@ export class DocumentsController {
 
   @Patch('/:id')
   update(
+    @CurrentUser() user: Users,
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateDocumentDto,
   ) {
-    return this.documentsService.update(id, dto);
+    return this.documentsService.update(id, dto, user);
   }
 
   @Post('/')
-  create(@Body() dto: CreateDocumentDto) {
-    return this.documentsService.create(dto);
+  create(@CurrentUser() user: Users, @Body() dto: CreateDocumentDto) {
+    return this.documentsService.create(dto, user);
   }
 
   @Delete('/:id')
-  delete(@Param('id', ParseIntPipe) id: number) {
-    return this.documentsService.remove(id);
+  delete(@CurrentUser() user: Users, @Param('id', ParseIntPipe) id: number) {
+    return this.documentsService.remove(id, user);
   }
 }
