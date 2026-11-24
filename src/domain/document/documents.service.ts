@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -35,6 +36,7 @@ export class DocumentsService {
 
   async create(dto: CreateDocumentDto, user: Users) {
     const { subjectId, ...fields } = dto;
+    await this.assertSubjectExists(subjectId);
     const document = await this.documentsRepository.save(
       this.documentsRepository.create({
         ...fields,
@@ -55,19 +57,32 @@ export class DocumentsService {
     return this.findActive({ category, sort, limit, offset, year });
   }
 
-  async findOne(id: number, withViewCount = false) {
+  private async findOne(id: number) {
     const document = await this.documentsRepository.findOne({
       where: { id: String(id) },
       relations: WITH_RELATIONS,
     });
     if (!document) throw new NotFoundException('Không tìm thấy tài liệu');
-    if (!withViewCount) return document;
+    return document;
+  }
+
+  async findVisible(id: number, user: Users) {
+    const document = await this.findOne(id);
+    if (
+      document.status !== DocumentStatus.ACTIVE &&
+      document.uploader?.id !== user.id
+    ) {
+      throw new NotFoundException('Không tìm thấy tài liệu');
+    }
     return Object.assign(document, { viewCount: await this.countViews(id) });
   }
 
-  findByUploaderId(uploaderId: string) {
+  findByUploaderId(uploaderId: string, user: Users) {
     return this.documentsRepository.find({
-      where: { uploader: { id: uploaderId } },
+      where: {
+        uploader: { id: uploaderId },
+        ...(uploaderId !== user.id && { status: DocumentStatus.ACTIVE }),
+      },
       relations: WITH_RELATIONS,
     });
   }
@@ -171,7 +186,10 @@ export class DocumentsService {
     }
     const { subjectId, ...fields } = dto;
     this.documentsRepository.merge(document, fields);
-    if (subjectId) document.subject = { id: subjectId } as Subjects;
+    if (subjectId) {
+      await this.assertSubjectExists(subjectId);
+      document.subject = { id: subjectId } as Subjects;
+    }
     document.status = DocumentStatus.PENDING;
     document.rejectReason = null;
     document.reviewedBy = null;
@@ -184,6 +202,13 @@ export class DocumentsService {
     this.assertUploader(document, user);
     await this.documentsRepository.remove(document);
     return document;
+  }
+
+  private async assertSubjectExists(id: number) {
+    const exists = await this.documentsRepository.manager.existsBy(Subjects, {
+      id,
+    });
+    if (!exists) throw new BadRequestException('Môn học không tồn tại');
   }
 
   private assertUploader(document: Documents, user: Users) {

@@ -55,13 +55,16 @@ export class DocumentsController {
   }
 
   @Get('/:id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.documentsService.findOne(id, true);
+  findOne(@CurrentUser() user: Users, @Param('id', ParseIntPipe) id: number) {
+    return this.documentsService.findVisible(id, user);
   }
 
   @Get('/author/:authorId')
-  findByAuthor(@Param('authorId') authorId: string) {
-    return this.documentsService.findByUploaderId(authorId);
+  findByAuthor(
+    @CurrentUser() user: Users,
+    @Param('authorId') authorId: string,
+  ) {
+    return this.documentsService.findByUploaderId(authorId, user);
   }
 
   @Get('/subject/:subjectId')

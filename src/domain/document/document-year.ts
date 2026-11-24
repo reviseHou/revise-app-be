@@ -1,5 +1,5 @@
-const MIN_YEAR = 1900;
-const MAX_YEAR = 2100;
+export const MIN_YEAR = 1900;
+export const MAX_YEAR = 2100;
 
 export function yearOf(param?: string): number | undefined {
   const year = Number(param);

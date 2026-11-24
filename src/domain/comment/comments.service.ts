@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Documents } from '../document/entity/document.entity';
-import { ActiveStatus, SourceType, QuizStatus } from '../enums';
+import { ActiveStatus, DocumentStatus, QuizStatus, SourceType } from '../enums';
 import { Quizzes } from '../quiz/entity/quiz.entity';
 import { Users } from '../user/entity/user.entity';
 import { SourceKeyDto } from '../validation';
@@ -135,7 +135,10 @@ export class CommentsService {
   private async assertSourceExists(sourceType: SourceType, sourceId: number) {
     const exists =
       sourceType === SourceType.DOCUMENT
-        ? await this.documentsRepository.existsBy({ id: String(sourceId) })
+        ? await this.documentsRepository.existsBy({
+            id: String(sourceId),
+            status: DocumentStatus.ACTIVE,
+          })
         : await this.quizzesRepository.existsBy({
             id: sourceId,
             status: QuizStatus.ACTIVE,

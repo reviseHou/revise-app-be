@@ -1,7 +1,6 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { SubjectsService } from './subjects.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { CreateSubjectDto } from './dto/subjects.dto';
 import { JwtAuthGuard } from 'src/domain/auth/guards/jwt.guard';
 
 @ApiTags('Subjects Management')
@@ -14,10 +13,5 @@ export class SubjectsController {
   @Get('/')
   findAll() {
     return this.subjectsService.findAll();
-  }
-
-  @Post('/')
-  create(@Body() dto: CreateSubjectDto) {
-    return this.subjectsService.create(dto);
   }
 }
