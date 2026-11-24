@@ -14,7 +14,8 @@ import { extname } from 'path';
 import * as crypto from 'crypto';
 import { JwtAuthGuard } from 'src/domain/auth/guards/jwt.guard';
 
-const INLINE_EXTENSIONS = ['.pdf', '.png', '.jpg', '.jpeg'];
+const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx', '.ppt', '.pptx'];
+const INLINE_EXTENSIONS = ['.pdf'];
 const MAX_FILE_MB = 10;
 
 @Controller('upload')
@@ -27,21 +28,8 @@ export class UploadController {
       storage: memoryStorage(),
       limits: { fileSize: MAX_FILE_MB * 1024 * 1024 },
       fileFilter: (req, file, cb) => {
-        const allowedExtensions = [
-          '.pdf',
-          '.doc',
-          '.docx',
-          '.xls',
-          '.xlsx',
-          '.ppt',
-          '.pptx',
-          '.txt',
-          '.png',
-          '.jpg',
-          '.jpeg',
-        ];
         const ext = extname(file.originalname).toLowerCase();
-        if (allowedExtensions.includes(ext)) {
+        if (ALLOWED_EXTENSIONS.includes(ext)) {
           cb(null, true);
         } else {
           cb(
