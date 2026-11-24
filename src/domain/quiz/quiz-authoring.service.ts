@@ -122,7 +122,7 @@ export class QuizAuthoringService {
   async remove(user: Users, id: number) {
     const quiz = await this.findOwned(user, id);
     await this.quizzesRepository.update(quiz.id, {
-      status: QuizStatus.INACTIVE,
+      status: QuizStatus.DELETED,
     });
     return { id: quiz.id };
   }
@@ -175,7 +175,10 @@ export class QuizAuthoringService {
       where: { id },
       relations: ['subject', 'createdBy'],
     });
-    if (!quiz || quiz.status === QuizStatus.INACTIVE) {
+    if (
+      !quiz ||
+      [QuizStatus.INACTIVE, QuizStatus.DELETED].includes(quiz.status)
+    ) {
       throw new NotFoundException(`Quiz ${id} not found`);
     }
     if (quiz.createdBy?.id !== user.id) {

@@ -15,6 +15,8 @@ export enum QuizStatus {
   REJECTED = 'REJECTED',
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
+  // Deleted by its author: kept only for attempt history, cannot be restored.
+  DELETED = 'DELETED',
 }
 
 export enum QuestionType {
