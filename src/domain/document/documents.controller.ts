@@ -15,6 +15,7 @@ import { CurrentUser } from 'src/domain/auth/decorator/current-user.decorator';
 import { JwtAuthGuard } from 'src/domain/auth/guards/jwt.guard';
 import { DocumentCategory, DocumentSort } from 'src/domain/enums';
 import { Users } from 'src/domain/user/entity/user.entity';
+import { yearOf } from './document-year';
 import { DocumentsService } from './documents.service';
 import { CreateDocumentDto, UpdateDocumentDto } from './dto/documents.dto';
 
@@ -30,11 +31,13 @@ export class DocumentsController {
   @ApiQuery({ name: 'sort', required: false, enum: DocumentSort })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'offset', required: false, type: Number })
+  @ApiQuery({ name: 'year', required: false, type: Number })
   findAll(
     @Query('category') categoryParam?: string,
     @Query('sort') sortParam?: string,
     @Query('limit') limitParam?: string,
     @Query('offset') offsetParam?: string,
+    @Query('year') yearParam?: string,
   ) {
     const category = Object.values(DocumentCategory).find(
       (c) => c === categoryParam,
@@ -47,6 +50,7 @@ export class DocumentsController {
       sort,
       Number.isInteger(limit) && limit > 0 ? Math.min(limit, 100) : undefined,
       Number.isInteger(offset) && offset > 0 ? offset : undefined,
+      yearOf(yearParam),
     );
   }
 
@@ -63,16 +67,23 @@ export class DocumentsController {
   @Get('/subject/:subjectId')
   @ApiQuery({ name: 'category', required: false, enum: DocumentCategory })
   @ApiQuery({ name: 'sort', required: false, enum: DocumentSort })
+  @ApiQuery({ name: 'year', required: false, type: Number })
   findBySubject(
     @Param('subjectId') subjectId: number,
     @Query('category') categoryParam?: string,
     @Query('sort') sortParam?: string,
+    @Query('year') yearParam?: string,
   ) {
     const category = Object.values(DocumentCategory).find(
       (c) => c === categoryParam,
     );
     const sort = Object.values(DocumentSort).find((s) => s === sortParam);
-    return this.documentsService.findBySubjectId(subjectId, category, sort);
+    return this.documentsService.findBySubjectId(
+      subjectId,
+      category,
+      sort,
+      yearOf(yearParam),
+    );
   }
 
   @Post('/:id/views')

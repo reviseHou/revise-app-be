@@ -50,8 +50,9 @@ export class DocumentsService {
     sort = DocumentSort.NEWEST,
     limit?: number,
     offset?: number,
+    year?: number,
   ) {
-    return this.findActive({ category, sort, limit, offset });
+    return this.findActive({ category, sort, limit, offset, year });
   }
 
   async findOne(id: number, withViewCount = false) {
@@ -75,8 +76,9 @@ export class DocumentsService {
     subjectId: number,
     category?: DocumentCategory,
     sort = DocumentSort.NEWEST,
+    year?: number,
   ) {
-    return this.findActive({ subjectId, category, sort });
+    return this.findActive({ subjectId, category, sort, year });
   }
 
   private async findActive({
@@ -85,12 +87,14 @@ export class DocumentsService {
     sort = DocumentSort.NEWEST,
     limit,
     offset,
+    year,
   }: {
     subjectId?: number;
     category?: DocumentCategory;
     sort?: DocumentSort;
     limit?: number;
     offset?: number;
+    year?: number;
   }) {
     const query = this.documentsRepository
       .createQueryBuilder('document')
@@ -107,6 +111,7 @@ export class DocumentsService {
       .where('document.status = :status', { status: DocumentStatus.ACTIVE });
     if (subjectId) query.andWhere('subject.id = :subjectId', { subjectId });
     if (category) query.andWhere('document.category = :category', { category });
+    if (year) query.andWhere('document.year = :year', { year });
     if (limit) query.limit(limit);
     if (offset) query.offset(offset);
     if (sort === DocumentSort.VIEWS) query.orderBy('view_count', 'DESC');
