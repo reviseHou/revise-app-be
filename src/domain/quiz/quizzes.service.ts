@@ -61,9 +61,7 @@ export class QuizzesService {
   async mine(userId: string): Promise<MyQuizView[]> {
     const { entities, raw } = await this.withCounts(null)
       .andWhere('quiz.created_by = :userId', { userId })
-      .andWhere('quiz.status NOT IN (:...hidden)', {
-        hidden: [QuizStatus.INACTIVE, QuizStatus.DELETED],
-      })
+      .andWhere('quiz.status != :hidden', { hidden: QuizStatus.INACTIVE })
       .orderBy('quiz.dateModified', 'DESC')
       .getRawAndEntities<RawCounts>();
     return entities.map((quiz, index) => ({

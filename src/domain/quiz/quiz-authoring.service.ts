@@ -7,7 +7,10 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
-import { ActiveStatus, QuizStatus } from '../enums';
+import { Comments } from '../comment/entity/comment.entity';
+import { ActiveStatus, QuizStatus, SourceType } from '../enums';
+import { Ratings } from '../rating/entity/rating.entity';
+import { SavedItems } from '../saved/entity/saved-item.entity';
 import { Subjects } from '../subject/entity/subject.entity';
 import { Users } from '../user/entity/user.entity';
 import { Answers } from './entity/answer.entity';
@@ -121,8 +124,13 @@ export class QuizAuthoringService {
 
   async remove(user: Users, id: number) {
     const quiz = await this.findOwned(user, id);
-    await this.quizzesRepository.update(quiz.id, {
-      status: QuizStatus.DELETED,
+    const source = { sourceType: SourceType.QUIZ, sourceId: String(quiz.id) };
+    await this.dataSource.transaction(async (manager) => {
+      // These tables have no foreign key to quiz; questions, answers and attempts cascade.
+      await manager.delete(Comments, source);
+      await manager.delete(Ratings, source);
+      await manager.delete(SavedItems, source);
+      await manager.delete(Quizzes, quiz.id);
     });
     return { id: quiz.id };
   }
@@ -175,10 +183,7 @@ export class QuizAuthoringService {
       where: { id },
       relations: ['subject', 'createdBy'],
     });
-    if (
-      !quiz ||
-      [QuizStatus.INACTIVE, QuizStatus.DELETED].includes(quiz.status)
-    ) {
+    if (!quiz || quiz.status === QuizStatus.INACTIVE) {
       throw new NotFoundException(`Quiz ${id} not found`);
     }
     if (quiz.createdBy?.id !== user.id) {

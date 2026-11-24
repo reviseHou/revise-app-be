@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ActiveStatus, QuizStatus } from '../enums';
 import {
   FacultyScope,
@@ -40,7 +40,6 @@ export class QuizBean {
     const rows = await query
       .select('quiz.status', 'status')
       .addSelect('COUNT(quiz.id)', 'count')
-      .andWhere('quiz.status != :deleted', { deleted: QuizStatus.DELETED })
       .groupBy('quiz.status')
       .getRawMany<{ status: QuizStatus; count: string }>();
     const countByStatus = {} as Record<QuizStatus, number>;
@@ -61,7 +60,6 @@ export class QuizBean {
       .leftJoinAndSelect('quiz.subject', 'subject')
       .leftJoinAndSelect('subject.major', 'major')
       .leftJoinAndSelect('major.faculty', 'faculty')
-      .where('quiz.status != :deleted', { deleted: QuizStatus.DELETED })
       .orderBy('quiz.dateCreated', 'DESC')
       .skip(offsetOf(page))
       .take(PAGE_SIZE);
@@ -76,7 +74,7 @@ export class QuizBean {
 
   async findById(id: number, scope: FacultyScope) {
     const quiz = await this.quizRepository.findOne({
-      where: { id, status: Not(QuizStatus.DELETED) },
+      where: { id },
       relations: [
         'createdBy',
         'reviewedBy',
@@ -156,7 +154,7 @@ export class QuizBean {
     result: { status: QuizStatus; rejectReason: string | null },
   ) {
     const quiz = await this.quizRepository.findOne({
-      where: { id, status: Not(QuizStatus.DELETED) },
+      where: { id },
       relations: [
         'createdBy',
         'subject',
