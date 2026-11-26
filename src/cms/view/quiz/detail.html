@@ -1,5 +1,5 @@
 {{#extend "title"}}{{quiz.name}}{{/extend}}
-{{#extend "breadcrumb"}}<li class="breadcrumb-item"><a href="/cms/quizzes">Duyệt bài kiểm tra</a></li>{{/extend}}
+{{#extend "breadcrumb"}}<li class="breadcrumb-item"><a href="/cms/quizzes">Duyệt đề</a></li>{{/extend}}
 <div class="row">
     <div class="col-lg-8">
         <div class="card card-outline card-primary">
@@ -54,7 +54,7 @@
             <div class="card card-success card-outline">
                 <div class="card-header"><h3 class="card-title">Duyệt</h3></div>
                 <div class="card-body">
-                    <button type="button" class="btn btn-success btn-block" data-delete-action="/cms/quizzes/{{quiz.id}}/approve" data-confirm-title="Bạn có chắc chắn muốn duyệt bài kiểm tra này không?" data-delete-name="{{quiz.name}}"><i class="fas fa-check"></i> Duyệt bài kiểm tra</button>
+                    <button type="button" class="btn btn-success btn-block" data-delete-action="/cms/quizzes/{{quiz.id}}/approve" data-confirm-title="Bạn có chắc chắn muốn duyệt đề này không?" data-delete-name="{{quiz.name}}"><i class="fas fa-check"></i> Duyệt đề</button>
                 </div>
             </div>
             <div class="card card-danger card-outline">

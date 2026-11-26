@@ -5,35 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Đăng nhập · Revise HOU CMS</title>
     <link rel="icon" type="image/svg+xml" href="/cms/resources/images/logo-mark.svg">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
     <link rel="stylesheet" href="/cms/resources/adminlte/css/adminlte.min.css">
     <link rel="stylesheet" href="/cms/resources/plugin/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="/cms/resources/css/cms.css">
 </head>
-<body class="hold-transition login-page">
-<div class="login-wrap">
-    <div class="login-panel">
-        <div class="brand"><img src="/cms/resources/images/logo.svg" alt="Revise HOU" width="221" height="40"></div>
-        <div class="card">
-            <div class="card-body">
+<body class="signin-page">
+<main class="signin">
+    <div class="signin-layout">
+        <div class="signin-left">
+            <img class="signin-logo" src="/cms/resources/images/logo.svg" alt="Revise HOU" width="221" height="40">
+            <section class="signin-card">
                 {{> alert}}
                 <h1>Chào mừng bạn đến với Revise HOU</h1>
-                <p class="text-center text-muted small">Đăng nhập để quản trị hệ thống</p>
-                <a href="/api/auth/google?from=cms" class="btn btn-block btn-google"><i class="fab fa-google mr-2"></i> Đăng nhập với HOU gmail</a>
-                <p class="text-center text-muted small mt-4 mb-0">Bằng cách tiếp tục, bạn đồng ý với Điều khoản dịch vụ và Chính sách bảo mật</p>
-            </div>
+                <p class="signin-text">Đăng nhập để quản trị hệ thống</p>
+                <a href="/api/auth/google?from=cms" class="signin-button">Đăng nhập với HOU gmail</a>
+                <p class="signin-terms">Bằng cách tiếp tục, bạn đồng ý với Điều khoản dịch vụ và Chính sách bảo mật</p>
+            </section>
         </div>
+        <section class="signin-hero">
+            <h2>Học lại,<br>nhớ <em>mãi mãi</em></h2>
+            <p>Hệ thống ôn tập thông minh dành cho sinh viên Trường Đại học Mở Hà Nội – giúp bạn ghi nhớ kiến thức bền vững, đơn giản và hiệu quả.</p>
+            <ul>
+                <li><span class="signin-check"><i class="fas fa-check"></i></span>Lặp lại cách quãng dựa trên trí nhớ của bạn</li>
+                <li><span class="signin-check"><i class="fas fa-check"></i></span>Flashcard thông minh tự thích nghi</li>
+                <li><span class="signin-check"><i class="fas fa-check"></i></span>Theo dõi tiến độ học tập mỗi ngày</li>
+            </ul>
+            <p class="signin-tag">Dành cho sinh viên Trường Đại học Mở Hà Nội</p>
+        </section>
     </div>
-    <div class="login-hero">
-        <h2>Học lại,<br>nhớ <em>mãi mãi</em></h2>
-        <p class="text-muted">Hệ thống ôn tập thông minh dành cho sinh viên Đại học Mở Hà Nội – giúp bạn ghi nhớ kiến thức bền vững, đơn giản và hiệu quả.</p>
-        <ul>
-            <li><i class="far fa-check-circle"></i>Lặp lại cách quãng dựa trên trí nhớ của bạn</li>
-            <li><i class="far fa-check-circle"></i>Flashcard thông minh tự thích nghi</li>
-            <li><i class="far fa-check-circle"></i>Theo dõi tiến độ học tập mỗi ngày</li>
-        </ul>
-        <span class="tag">Dành cho sinh viên Trường Đại học Mở Hà Nội</span>
-    </div>
-</div>
+</main>
 <script src="/cms/resources/plugin/jquery/jquery.min.js"></script>
 <script src="/cms/resources/plugin/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="/cms/resources/adminlte/js/adminlte.min.js"></script>

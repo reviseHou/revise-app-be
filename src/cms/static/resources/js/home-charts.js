@@ -10,7 +10,7 @@
     var noGrid = { grid: { display: false } };
     var wholeNumbers = { beginAtZero: true, ticks: { precision: 0 } };
 
-    Chart.defaults.font.family = 'inherit';
+    Chart.defaults.font.family = 'Inter, sans-serif';
     Chart.defaults.maintainAspectRatio = false;
 
     function names(rows) { return rows.map(function (row) { return row.name; }); }

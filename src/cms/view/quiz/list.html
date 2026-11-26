@@ -1,5 +1,5 @@
-{{#extend "title"}}Duyệt bài kiểm tra{{/extend}}
-{{#extend "subtitle"}}Xem xét và duyệt bài kiểm tra do người dùng tạo.{{/extend}}
+{{#extend "title"}}Duyệt đề{{/extend}}
+{{#extend "subtitle"}}Xem xét và duyệt đề do người dùng tạo.{{/extend}}
 <form method="get" action="/cms/quizzes" class="toolbar">
     <input type="hidden" name="status" value="{{status}}">
     <a href="/cms/quizzes?status=ALL" class="chip {{#if (eq status 'ALL')}}active{{/if}}">Tất cả ({{countAll}})</a>

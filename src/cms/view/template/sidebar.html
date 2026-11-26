@@ -7,47 +7,47 @@
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column nav-flat" data-widget="treeview" role="menu" data-accordion="false">
                 <li class="nav-item">
-                    <a href="/cms" class="nav-link {{#if (eq path '/cms')}}active{{/if}}">
+                    <a {{#if (can user 'READ_STATISTICS')}}href="/cms"{{else}}aria-disabled="true"{{/if}} class="nav-link {{#unless (can user 'READ_STATISTICS')}}disabled{{/unless}} {{#if (eq path '/cms')}}active{{/if}}">
                         <i class="nav-icon fas fa-chart-bar"></i><p>Thống kê</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/cms/faculties" class="nav-link {{#if (contains path '/cms/faculties')}}active{{/if}}">
+                    <a {{#if (can user 'READ_FACULTY')}}href="/cms/faculties"{{else}}aria-disabled="true"{{/if}} class="nav-link {{#unless (can user 'READ_FACULTY')}}disabled{{/unless}} {{#if (contains path '/cms/faculties')}}active{{/if}}">
                         <i class="nav-icon fas fa-university"></i><p>Khoa</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/cms/majors" class="nav-link {{#if (contains path '/cms/majors')}}active{{/if}}">
+                    <a {{#if (can user 'READ_MAJOR')}}href="/cms/majors"{{else}}aria-disabled="true"{{/if}} class="nav-link {{#unless (can user 'READ_MAJOR')}}disabled{{/unless}} {{#if (contains path '/cms/majors')}}active{{/if}}">
                         <i class="nav-icon fas fa-sitemap"></i><p>Ngành</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/cms/subjects" class="nav-link {{#if (contains path '/cms/subjects')}}active{{/if}}">
+                    <a {{#if (can user 'READ_SUBJECT')}}href="/cms/subjects"{{else}}aria-disabled="true"{{/if}} class="nav-link {{#unless (can user 'READ_SUBJECT')}}disabled{{/unless}} {{#if (contains path '/cms/subjects')}}active{{/if}}">
                         <i class="nav-icon fas fa-book"></i><p>Môn học</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/cms/documents" class="nav-link {{#if (contains path '/cms/documents')}}active{{/if}}">
+                    <a {{#if (can user 'READ_DOCUMENT')}}href="/cms/documents"{{else}}aria-disabled="true"{{/if}} class="nav-link {{#unless (can user 'READ_DOCUMENT')}}disabled{{/unless}} {{#if (contains path '/cms/documents')}}active{{/if}}">
                         <i class="nav-icon fas fa-check-double"></i><p>Duyệt tài liệu</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/cms/quizzes" class="nav-link {{#if (contains path '/cms/quizzes')}}active{{/if}}">
-                        <i class="nav-icon fas fa-clipboard-check"></i><p>Duyệt bài kiểm tra</p>
+                    <a {{#if (can user 'READ_QUIZ')}}href="/cms/quizzes"{{else}}aria-disabled="true"{{/if}} class="nav-link {{#unless (can user 'READ_QUIZ')}}disabled{{/unless}} {{#if (contains path '/cms/quizzes')}}active{{/if}}">
+                        <i class="nav-icon fas fa-clipboard-check"></i><p>Duyệt đề</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/cms/users" class="nav-link {{#if (contains path '/cms/users')}}active{{/if}}">
+                    <a {{#if (can user 'READ_USER')}}href="/cms/users"{{else}}aria-disabled="true"{{/if}} class="nav-link {{#unless (can user 'READ_USER')}}disabled{{/unless}} {{#if (contains path '/cms/users')}}active{{/if}}">
                         <i class="nav-icon fas fa-users"></i><p>Người dùng</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/cms/roles" class="nav-link {{#if (contains path '/cms/roles')}}active{{/if}}">
+                    <a {{#if (can user 'READ_ROLE')}}href="/cms/roles"{{else}}aria-disabled="true"{{/if}} class="nav-link {{#unless (can user 'READ_ROLE')}}disabled{{/unless}} {{#if (contains path '/cms/roles')}}active{{/if}}">
                         <i class="nav-icon fas fa-user-lock"></i><p>Vai trò</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/cms/permissions" class="nav-link {{#if (contains path '/cms/permissions')}}active{{/if}}">
+                    <a {{#if (can user 'READ_PERMISSION')}}href="/cms/permissions"{{else}}aria-disabled="true"{{/if}} class="nav-link {{#unless (can user 'READ_PERMISSION')}}disabled{{/unless}} {{#if (contains path '/cms/permissions')}}active{{/if}}">
                         <i class="nav-icon fas fa-key"></i><p>Quyền</p>
                     </a>
                 </li>

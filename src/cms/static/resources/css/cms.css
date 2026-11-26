@@ -1,4 +1,4 @@
-body { font-family: "Source Sans Pro", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+body { font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
 
 .brand-link .brand-image {
     float: left;
@@ -80,6 +80,8 @@ body, .content-wrapper { background: var(--hou-bg); }
 .nav-sidebar > .nav-item > .nav-link.active,
 .nav-sidebar > .nav-item > .nav-link.active:hover { background: var(--hou-blue-soft); color: var(--hou-blue); font-weight: 600; box-shadow: none; }
 .nav-sidebar .nav-icon { color: inherit; }
+.nav-sidebar > .nav-item > .nav-link.disabled,
+.nav-sidebar > .nav-item > .nav-link.disabled:hover { color: #9aa5b1; background: none; opacity: .6; cursor: default; }
 
 .content-header h1 { font-size: 1.6rem; font-weight: 700; }
 .content-header .page-subtitle { color: #6b7280; font-size: .9rem; margin: .15rem 0 0; }
@@ -124,21 +126,37 @@ body, .content-wrapper { background: var(--hou-bg); }
 .main-footer li { margin-bottom: .3rem; font-size: .88rem; }
 .main-footer .footer-copy { border-top: 1px solid rgba(255,255,255,.15); margin-top: 1.25rem; padding-top: .8rem; text-align: center; font-size: .8rem; }
 
-.login-page { background: linear-gradient(135deg, #f3f6fd, #dbe8fd); display: block; height: auto; min-height: 100vh; }
-.login-wrap { max-width: 980px; margin: 0 auto; padding: 3rem 1rem; display: flex; flex-wrap: wrap; align-items: center; gap: 2.5rem; min-height: 100vh; }
-.login-panel { flex: 1 1 340px; max-width: 400px; margin: 0 auto; }
-.login-panel .brand { text-align: center; margin-bottom: 1rem; }
-.login-panel .card { border-radius: 24px; padding: 1.5rem 1.25rem; }
-.login-panel h1 { font-size: 1.05rem; color: var(--hou-blue); text-align: center; font-weight: 600; margin-bottom: 1.25rem; }
-.login-panel .btn-google { border-radius: 10px; background: #fff; border: 1px solid #c9d3e0; color: #1f2a37; padding: .6rem; }
-.login-panel .btn-google:hover { background: var(--hou-bg); }
-.login-hero { flex: 1 1 340px; }
-.login-hero h2 { font-size: 2.6rem; font-weight: 400; font-family: Georgia, "Times New Roman", serif; line-height: 1.15; margin-bottom: 1rem; }
-.login-hero h2 em { color: var(--hou-blue); }
-.login-hero ul { list-style: none; padding: 0; margin: 1.5rem 0; }
-.login-hero li { margin-bottom: .6rem; }
-.login-hero li i { color: var(--hou-blue); margin-right: .5rem; }
-.login-hero .tag { display: inline-block; background: var(--hou-blue-soft); color: var(--hou-blue); border: 1px solid #b9d4ee; border-radius: 6px; padding: .4rem .8rem; font-weight: 600; font-size: .9rem; }
+
+.signin-page { font-family: "Inter", system-ui, "Segoe UI", Roboto, sans-serif; line-height: 1.5; color: #101112; }
+.signin-page h1, .signin-page h2, .signin-page p, .signin-page ul { margin: 0; }
+.signin { min-height: 100vh; display: grid; place-items: center; padding: 48px 24px; background: linear-gradient(135deg, #ffffff 0%, #f1f6ff 50%, #dce9ff 100%); }
+.signin-layout { display: flex; align-items: center; justify-content: center; gap: 134px; width: 100%; max-width: 1000px; }
+.signin-left { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.signin-logo { height: 40px; width: auto; }
+.signin-card { width: min(466px, 100%); display: flex; flex-direction: column; gap: 24px; padding: 32px 56px; background: #fff; border: 1px solid #b9bbbe; border-radius: 32px; }
+.signin-card h1 { font-size: 20px; line-height: 24px; font-weight: 700; color: #0174c0; }
+.signin-text { font-size: 16px; color: #7a838c; }
+.signin-button { display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 9999px; background: #0174c0; color: #fff; font-weight: 700; }
+.signin-button:hover { background: #005088; color: #fff; text-decoration: none; }
+.signin-terms { font-size: 10px; line-height: 15px; color: #7a838c; text-align: center; }
+.signin-hero { display: flex; flex-direction: column; gap: 16px; max-width: 392px; }
+.signin-hero h2 { font-size: 64px; line-height: 64px; font-weight: 400; }
+.signin-hero em { color: #0174c0; }
+.signin-hero ul { display: flex; flex-direction: column; gap: 16px; margin-top: 48px; padding: 0; list-style: none; }
+.signin-hero li { display: flex; align-items: center; gap: 16px; }
+.signin-check { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 24px; height: 24px; border: 1.5px solid #0174c0; border-radius: 50%; color: #0174c0; font-size: 11px; }
+.signin-page .signin-tag { position: relative; align-self: flex-start; margin-top: 60px; padding: 8px 16px 8px 38px; background: #d5e4ff; border: 1px solid #8fbeff; font-weight: 500; color: #0174c0; }
+.signin-tag::before { content: ""; position: absolute; left: 18px; top: 50%; width: 4px; height: 4px; border-radius: 50%; background: #0174c0; }
+@media (max-width: 960px) {
+    .signin-layout { flex-direction: column-reverse; gap: 48px; }
+    .signin-hero { align-items: center; text-align: center; }
+    .signin-hero h2 { font-size: 44px; line-height: 48px; }
+    .signin-hero ul { margin-top: 16px; }
+    .signin-page .signin-tag { display: none; }
+}
+@media (max-width: 480px) {
+    .signin-card { padding: 32px 24px; }
+}
 
 .action-cell { white-space: nowrap; }
 .action-cell form { display: inline-block; margin: 0; }

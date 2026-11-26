@@ -3,6 +3,8 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import hbs from 'hbs';
 import helpers from 'handlebars-helpers';
 import { PAGE_SIZE } from 'src/domain/paging';
+import { permissionCodesOf } from 'src/domain/user/users.service';
+import type { Users } from 'src/domain/user/entity/user.entity';
 import type { CmsRequest } from '../util/cms.helper';
 
 const PAGES_SHOWN_EACH_SIDE = 3;
@@ -29,6 +31,7 @@ export function setupViews(app: NestExpressApplication) {
   registerLayoutHelpers();
   registerListHelpers();
   registerFileHelpers();
+  registerPermissionHelpers();
   app.use('/cms', shareRequestWithViews);
 }
 
@@ -52,6 +55,12 @@ function shareRequestWithViews(
     get: () => request.user,
   });
   next();
+}
+
+function registerPermissionHelpers() {
+  hbs.registerHelper('can', (user: Users | undefined, code: string) =>
+    user ? permissionCodesOf(user).includes(code) : false,
+  );
 }
 
 function registerLayoutHelpers() {

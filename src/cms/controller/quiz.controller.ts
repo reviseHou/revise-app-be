@@ -79,7 +79,7 @@ export class QuizController {
     @Req() request: CmsRequest,
   ) {
     const quiz = await this.quizBean.approve(id, request.user);
-    return `Đã duyệt bài kiểm tra ${quiz.name}`;
+    return `Đã duyệt đề ${quiz.name}`;
   }
 
   @Post(':id/reject')
