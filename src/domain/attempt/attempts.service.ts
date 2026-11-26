@@ -100,7 +100,6 @@ export class AttemptsService {
       throw new ConflictException('Lượt làm bài đã được nộp');
     }
 
-    // No time check on submit: the client tracks the deadline (startedAt + now) and auto-submits when it ends.
     await this.grade(attempt, answers);
     return this.get(user, attemptId);
   }

@@ -22,7 +22,6 @@ const WITH_RELATIONS = ['uploader', 'subject'];
 
 const VIEW_WINDOW_MINUTES = 30;
 
-// Approved content (ACTIVE, or INACTIVE after being hidden) can only be deleted, not edited.
 const EDITABLE_STATUSES = [DocumentStatus.PENDING, DocumentStatus.REJECTED];
 
 @Injectable()
@@ -159,7 +158,6 @@ export class DocumentsService {
     const viewedRecently = await this.viewsRepository.existsBy({
       document: { id: String(id) },
       user: { id: user.id },
-      // so sánh bằng now() của DB vì date_created lưu theo giờ DB, không theo giờ máy chủ Node
       dateCreated: Raw(
         (column) =>
           `${column} > now() - interval '${VIEW_WINDOW_MINUTES} minutes'`,

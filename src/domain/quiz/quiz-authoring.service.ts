@@ -91,7 +91,6 @@ export class QuizAuthoringService {
 
   async update(user: Users, id: number, body: QuizContext) {
     const quiz = await this.findOwned(user, id);
-    // Approved quizzes can only be deleted; editing is allowed while PENDING or REJECTED.
     if (![QuizStatus.PENDING, QuizStatus.REJECTED].includes(quiz.status)) {
       throw new ConflictException(
         'Bài kiểm tra đã được duyệt nên không thể chỉnh sửa. Bạn có thể xóa và tạo bài mới.',
@@ -126,7 +125,6 @@ export class QuizAuthoringService {
     const quiz = await this.findOwned(user, id);
     const source = { sourceType: SourceType.QUIZ, sourceId: String(quiz.id) };
     await this.dataSource.transaction(async (manager) => {
-      // These tables have no foreign key to quiz; questions, answers and attempts cascade.
       await manager.delete(Comments, source);
       await manager.delete(Ratings, source);
       await manager.delete(SavedItems, source);
